@@ -23,9 +23,6 @@ app-backend   — REST controllers under /api/** (all REST endpoints go here)
 app-frontend  — React SPA (non-Java; uses pnpm + Vite)
 ```
 
-Additional Java modules apply the root `subprojects` block (Java toolchain, JUnit) automatically.
-`app-frontend` is excluded from the root `subprojects` block — it has no Java toolchain config.
-
 ### API conventions
 
 - All REST endpoints live in `app-backend` under the `/api/**` prefix.
