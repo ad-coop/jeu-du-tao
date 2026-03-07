@@ -83,4 +83,6 @@ Health details visible only to authorized users (`when_authorized`).
 ## Extended documentation
 
 On-demand open with Read tool (don't import with @) :
+
 - `doc/quick-reference.md` — Commands, structure, critical standards
+- `doc/vision.md` — The long-term vision of the project
