@@ -1,10 +1,5 @@
 plugins {
     id("jeudutao.java-conventions")
-    id("org.springframework.boot")
-}
-
-tasks.named("bootJar") {
-    enabled = false
 }
 
 tasks.named("jar") {
