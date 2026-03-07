@@ -1,4 +1,4 @@
-FROM eclipse-temurin:25-jdk AS build
+FROM eclipse-temurin:25.0.2_10-jdk AS build
 WORKDIR /workspace
 
 COPY gradlew .
