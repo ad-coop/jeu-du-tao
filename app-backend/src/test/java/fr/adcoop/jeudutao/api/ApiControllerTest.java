@@ -12,19 +12,18 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 class ApiControllerTest {
 
-  private MockMvc mockMvc;
+    private MockMvc mockMvc;
 
-  @BeforeEach
-  void setUp() {
-    mockMvc = MockMvcBuilders.standaloneSetup(new ApiController()).build();
-  }
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(new ApiController()).build();
+    }
 
-  @Test
-  void health_returnsOk() throws Exception {
-    mockMvc
-        .perform(get("/api/health"))
-        .andExpect(status().isOk())
-        .andExpect(content().contentTypeCompatibleWith("application/json"))
-        .andExpect(jsonPath("$.status").value("ok"));
-  }
+    @Test
+    void health_returnsOk() throws Exception {
+        mockMvc.perform(get("/api/health"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(jsonPath("$.status").value("ok"));
+    }
 }

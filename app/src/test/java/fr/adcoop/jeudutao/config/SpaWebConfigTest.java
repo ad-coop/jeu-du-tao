@@ -17,36 +17,33 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest
 class SpaWebConfigTest {
 
-  @Autowired private WebApplicationContext context;
+    @Autowired private WebApplicationContext context;
 
-  private MockMvc mockMvc;
+    private MockMvc mockMvc;
 
-  @BeforeEach
-  void setUp() {
-    mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-  }
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+    }
 
-  @Test
-  void get_ofUnknownPath_servesIndexHtml() throws Exception {
-    mockMvc
-        .perform(get("/some/spa/route"))
-        .andExpect(status().isOk())
-        .andExpect(content().string(containsString("<div id=\"root\">")));
-  }
+    @Test
+    void get_ofUnknownPath_servesIndexHtml() throws Exception {
+        mockMvc.perform(get("/some/spa/route"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<div id=\"root\">")));
+    }
 
-  @Test
-  void get_ofApiHealth_returnsJson() throws Exception {
-    mockMvc
-        .perform(get("/api/health"))
-        .andExpect(status().isOk())
-        .andExpect(content().contentTypeCompatibleWith("application/json"));
-  }
+    @Test
+    void get_ofApiHealth_returnsJson() throws Exception {
+        mockMvc.perform(get("/api/health"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/json"));
+    }
 
-  @Test
-  void get_ofActuatorHealth_returnsJson() throws Exception {
-    mockMvc
-        .perform(get("/actuator/health"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.status").exists());
-  }
+    @Test
+    void get_ofActuatorHealth_returnsJson() throws Exception {
+        mockMvc.perform(get("/actuator/health"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").exists());
+    }
 }

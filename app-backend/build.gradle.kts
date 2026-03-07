@@ -1,4 +1,5 @@
 plugins {
+    id("jeudutao.java-conventions")
     id("org.springframework.boot")
 }
 
