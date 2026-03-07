@@ -1,6 +1,6 @@
 plugins {
     id("org.springframework.boot") version "4.0.3" apply false
-    id("com.diffplug.spotless") version "7.0.4" apply false
+    id("com.diffplug.spotless") version "7.2.1" apply false
 }
 
 subprojects {
