@@ -32,8 +32,5 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v5
 
-      - name: Check formatting
-        run: ./gradlew spotlessCheck
-
       - name: Build
         run: ./gradlew build

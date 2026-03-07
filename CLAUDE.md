@@ -38,7 +38,6 @@ A Guardian initiates the game, then invites other players to join.
 | Framework | Spring Boot 4.0.3 (Spring Framework 7, Jakarta EE 11) |
 | JSON | Jackson 3 (group: `tools.jackson`) |
 | Tests | JUnit 5 via `spring-boot-starter-webmvc-test` |
-| Formatting | Spotless + Google Java Format **1.35.0** |
 | Frontend | React 19 + TypeScript (strict) + Vite |
 | Frontend pkg | pnpm |
 | Frontend routing | React Router v7 |
@@ -48,9 +47,7 @@ A Guardian initiates the game, then invites other players to join.
 ## Build Commands
 
 ```bash
-./gradlew build              # Compile + test + spotlessCheck + frontend build
-./gradlew spotlessCheck      # Check formatting
-./gradlew spotlessApply      # Auto-fix formatting
+./gradlew build              # Compile + test + frontend build
 ./gradlew :app:bootRun       # Run the application (port 8080)
 ./gradlew :app:bootJar       # Build fat JAR
 
@@ -77,8 +74,8 @@ app-backend   — REST controllers under /api/** (all REST endpoints go here)
 app-frontend  — React SPA (non-Java; uses pnpm + Vite)
 ```
 
-Additional Java modules apply the root `subprojects` block (Java toolchain, JUnit, Spotless) automatically.
-`app-frontend` is excluded from the root `subprojects` block — it has no Java toolchain or Spotless config.
+Additional Java modules apply the root `subprojects` block (Java toolchain, JUnit) automatically.
+`app-frontend` is excluded from the root `subprojects` block — it has no Java toolchain config.
 
 ### API conventions
 - All REST endpoints live in `app-backend` under the `/api/**` prefix.

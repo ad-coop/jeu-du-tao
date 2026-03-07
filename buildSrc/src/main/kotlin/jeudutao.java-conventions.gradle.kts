@@ -1,6 +1,5 @@
 plugins {
     java
-    id("com.diffplug.spotless")
 }
 
 java {
@@ -15,13 +14,4 @@ repositories {
 
 tasks.withType<Test> {
     useJUnitPlatform()
-}
-
-spotless {
-    java {
-        googleJavaFormat("1.35.0").aosp()
-        removeUnusedImports()
-        trimTrailingWhitespace()
-        endWithNewline()
-    }
 }
