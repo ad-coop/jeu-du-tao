@@ -4,6 +4,8 @@ plugins {
 }
 
 subprojects {
+    if (project.name == "app-frontend") return@subprojects
+
     apply(plugin = "java")
 
     extensions.configure<JavaPluginExtension> {

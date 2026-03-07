@@ -39,15 +39,27 @@ A Guardian initiates the game, then invites other players to join.
 | JSON | Jackson 3 (group: `tools.jackson`) |
 | Tests | JUnit 5 via `spring-boot-starter-webmvc-test` |
 | Formatting | Spotless + Google Java Format **1.35.0** |
+| Frontend | React 19 + TypeScript (strict) + Vite |
+| Frontend pkg | pnpm |
+| Frontend routing | React Router v7 |
+| Frontend tests | Vitest + @testing-library/react |
+| Frontend lint | ESLint 9 flat config + typescript-eslint strict |
 
 ## Build Commands
 
 ```bash
-./gradlew build              # Compile + test + spotlessCheck
+./gradlew build              # Compile + test + spotlessCheck + frontend build
 ./gradlew spotlessCheck      # Check formatting
 ./gradlew spotlessApply      # Auto-fix formatting
 ./gradlew :app:bootRun       # Run the application (port 8080)
 ./gradlew :app:bootJar       # Build fat JAR
+
+# Frontend (in app-frontend/)
+pnpm install                 # Install dependencies
+pnpm run dev                 # Vite dev server (proxies /api, /actuator to :8080)
+pnpm run build               # Production build → dist/
+pnpm test                    # Run Vitest tests
+pnpm run lint                # ESLint
 ```
 
 ## Spring Boot 4 Conventions
@@ -59,12 +71,22 @@ A Guardian initiates the game, then invites other players to join.
 
 ## Modules
 
-Additional modules are added to `settings.gradle.kts` as:
-```kotlin
-include("module-name")
+```
+app           — Spring Boot entry point; serves frontend SPA at /
+app-backend   — REST controllers under /api/** (all REST endpoints go here)
+app-frontend  — React SPA (non-Java; uses pnpm + Vite)
 ```
 
-Each module applies the root `subprojects` block configuration (Java toolchain, JUnit, Spotless).
+Additional Java modules apply the root `subprojects` block (Java toolchain, JUnit, Spotless) automatically.
+`app-frontend` is excluded from the root `subprojects` block — it has no Java toolchain or Spotless config.
+
+### API conventions
+- All REST endpoints live in `app-backend` under the `/api/**` prefix.
+- `/actuator/**` is reserved for Spring Boot actuator.
+- Any unmatched path is served `index.html` by the SPA fallback (`SpaWebConfig`).
+
+## Spring Boot 4 Notes
+- `@AutoConfigureMockMvc` is NOT available in `spring-boot-starter-webmvc-test`; use `MockMvcBuilders.webAppContextSetup(context)` instead.
 
 ## Java
 - Prefer var over explicit variable type when the right member is explicit enough.

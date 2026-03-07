@@ -15,6 +15,16 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app-frontend/pnpm-lock.yaml
+
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
