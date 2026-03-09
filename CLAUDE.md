@@ -22,9 +22,10 @@ clarity. It's suitable for individuals and businesses alike, for individual or c
 Users are distributed, each on their own computer.
 A Guardian initiates the game, then invites other players to join.
 
-## PRDs
+## Specifications
 
-- Specifications are in `doc/plan/NNNN-name/`.
+- Specifications are in `doc/spec/NNNN-name/*.md`. They mix technical and non-technical content (but their structure
+  should clearly separate concerns).
 - Status : `draft` → `ready for implementation` → `qa` → `done`.
     - Draft: the PRD is being written, but not yet ready for implementation.
     - Ready for implementation: the PRD is complete and can be implemented.
@@ -86,3 +87,5 @@ On-demand open with Read tool (don't import with @) :
 
 - `doc/quick-reference.md` — Commands, structure, critical standards
 - `doc/vision.md` — The long-term vision of the project
+
+When a decision impacts one of those documents, update it.

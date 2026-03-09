@@ -1,11 +1,7 @@
-import styles from "./App.module.css";
+import { LandingPage } from "./pages/LandingPage/LandingPage";
 
 function App() {
-  return (
-    <main className={styles.main}>
-      <h1>Jeu du Tao</h1>
-    </main>
-  );
+  return <LandingPage />;
 }
 
 export default App;

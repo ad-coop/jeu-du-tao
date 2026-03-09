@@ -1,0 +1,84 @@
+.hero {
+  min-height: 100vh;
+  background-color: var(--color-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--color-text-on-dark);
+  padding: 4rem 2rem;
+}
+
+.logo {
+  width: clamp(120px, 20vw, 200px);
+  height: auto;
+  margin-bottom: 2rem;
+  border-radius: 0.5rem;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-bold);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  margin: 0 0 1rem;
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-regular);
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+  margin: 0 0 1.5rem;
+}
+
+.intro {
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-regular);
+  font-size: clamp(1rem, 2vw, 1.125rem);
+  line-height: 1.7;
+  max-width: 42rem;
+  margin: 0 0 2.5rem;
+}
+
+.cta {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.button {
+  flex: 1;
+  max-width: 18rem;
+  background-color: var(--color-accent);
+  color: #1a1a1a;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-semibold);
+  font-size: 1.125rem;
+  padding: 1rem 2.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+
+.button:hover {
+  filter: brightness(1.1);
+}
+
+.button:focus-visible {
+  outline: 3px solid var(--color-text-on-dark);
+  outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+  .cta {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .button {
+    max-width: none;
+    width: 100%;
+  }
+}

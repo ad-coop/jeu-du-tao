@@ -1,0 +1,26 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+:root {
+  --color-primary-dark: #003d58;
+  --color-primary: #00577c;
+  --color-primary-light: #73a1b2;
+  --color-accent: #31d3c5;
+  --color-neutral-light: #ececeb;
+  --color-text-on-dark: #ffffff;
+
+  --font-heading: "Merriweather", serif;
+  --font-body: "Open Sans", sans-serif;
+
+  --font-weight-regular: 400;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+}
