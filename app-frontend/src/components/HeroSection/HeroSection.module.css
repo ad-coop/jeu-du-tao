@@ -60,6 +60,10 @@
   border-radius: 0.5rem;
   cursor: pointer;
   transition: filter 0.2s;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .button:hover {

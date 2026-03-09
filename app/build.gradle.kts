@@ -11,6 +11,7 @@ val frontendDist by configurations.creating {
 dependencies {
     implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation(project(":app-backend"))
     frontendDist(project(path = ":app-frontend", configuration = "frontendDist"))

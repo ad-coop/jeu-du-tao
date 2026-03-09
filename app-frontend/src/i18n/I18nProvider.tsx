@@ -1,7 +1,7 @@
 import { createContext, useCallback, useEffect, useState } from "react";
 
 type I18nContextType = {
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, string>) => string;
 };
 
 export const I18nContext = createContext<I18nContextType | null>(null);
@@ -22,7 +22,15 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const t = useCallback(
-    (key: string) => translations[key] ?? key,
+    (key: string, params?: Record<string, string>) => {
+      const value = translations[key] ?? key;
+      if (!params) return value;
+      return Object.entries(params).reduce(
+        (result, [param, replacement]) =>
+          result.replace(new RegExp(`\\{${param}\\}`, "g"), replacement),
+        value,
+      );
+    },
     [translations],
   );
 

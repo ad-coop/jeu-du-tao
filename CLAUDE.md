@@ -81,11 +81,20 @@ A Guardian initiates the game, then invites other players to join.
 Exposed endpoints: `health`, `info` only.
 Health details visible only to authorized users (`when_authorized`).
 
+## i18n
+
+- (important) The frontend (`t()` call sites) is the **single source of truth** for i18n key names.
+- Before writing any key in `messages_fr.properties`, grep the frontend for the actual keys used: `grep -r 't("' app-frontend/src`.
+- Never invent key names server-side — derive them from the frontend code.
+- Key naming convention: `<feature>.<section>.<element>` (e.g., `game.waiting.handle.copy`). See `doc/i18n.md`.
+- (important) When multiple agents work in parallel on the same feature, i18n must be owned by a single agent (preferably the frontend agent, which also writes the properties file).
+
 ## Extended documentation
 
 On-demand open with Read tool (don't import with @) :
 
 - `doc/quick-reference.md` — Commands, structure, critical standards
 - `doc/vision.md` — The long-term vision of the project
+- `doc/i18n.md` — i18n architecture, key naming conventions, workflow
 
 When a decision impacts one of those documents, update it.

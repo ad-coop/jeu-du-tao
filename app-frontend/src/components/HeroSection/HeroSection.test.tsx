@@ -1,23 +1,18 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
 import { HeroSection } from "./HeroSection";
-
-const mockShowToast = vi.fn();
 
 vi.mock("../../i18n", () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
 
-vi.mock("../Toast", () => ({
-  useToast: () => ({ showToast: mockShowToast }),
-}));
-
 describe("HeroSection", () => {
-  beforeEach(() => {
-    mockShowToast.mockClear();
-  });
-
   it("render_showsBannerWithLogoHeadingAndParagraphs", () => {
-    render(<HeroSection />);
+    render(
+      <MemoryRouter>
+        <HeroSection />
+      </MemoryRouter>,
+    );
 
     expect(screen.getByRole("banner")).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
@@ -26,19 +21,35 @@ describe("HeroSection", () => {
     expect(screen.getByText("landing.intro")).toBeInTheDocument();
   });
 
-  it("render_showsTwoCtaButtons", () => {
-    render(<HeroSection />);
+  it("render_showsTwoCtaLinks", () => {
+    render(
+      <MemoryRouter>
+        <HeroSection />
+      </MemoryRouter>,
+    );
 
-    expect(screen.getAllByRole("button")).toHaveLength(2);
+    expect(screen.getAllByRole("link")).toHaveLength(2);
   });
 
-  it("ctaClick_triggersToast", () => {
-    render(<HeroSection />);
+  it("render_createGameLinkPointsToCreateRoute", () => {
+    render(
+      <MemoryRouter>
+        <HeroSection />
+      </MemoryRouter>,
+    );
 
-    const [firstButton] = screen.getAllByRole("button");
-    if (!firstButton) throw new Error("No buttons found");
-    fireEvent.click(firstButton);
+    const createLink = screen.getByText("landing.cta.createGame");
+    expect(createLink).toHaveAttribute("href", "/game/create");
+  });
 
-    expect(mockShowToast).toHaveBeenCalledWith("landing.toast.comingSoon");
+  it("render_joinGameLinkPointsToJoinRoute", () => {
+    render(
+      <MemoryRouter>
+        <HeroSection />
+      </MemoryRouter>,
+    );
+
+    const joinLink = screen.getByText("landing.cta.joinGame");
+    expect(joinLink).toHaveAttribute("href", "/game/join");
   });
 });

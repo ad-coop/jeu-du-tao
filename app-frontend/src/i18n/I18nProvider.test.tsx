@@ -7,6 +7,17 @@ function TestComponent({ translationKey }: { translationKey: string }) {
   return <div>{t(translationKey)}</div>;
 }
 
+function TestComponentWithParams({
+  translationKey,
+  params,
+}: {
+  translationKey: string;
+  params: Record<string, string>;
+}) {
+  const { t } = useTranslation();
+  return <div>{t(translationKey, params)}</div>;
+}
+
 describe("I18nProvider", () => {
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn());
@@ -30,6 +41,27 @@ describe("I18nProvider", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Le Jeu du Tao")).toBeInTheDocument();
+    });
+  });
+
+  it("t_whenParamsProvided_interpolatesValues", async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({ "game.welcome": "Bienvenue, {name} !" }),
+    } as Response);
+
+    render(
+      <I18nProvider>
+        <TestComponentWithParams
+          translationKey="game.welcome"
+          params={{ name: "Alice" }}
+        />
+      </I18nProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Bienvenue, Alice !")).toBeInTheDocument();
     });
   });
 

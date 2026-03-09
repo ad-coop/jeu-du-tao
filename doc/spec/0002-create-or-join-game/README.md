@@ -64,6 +64,10 @@ The waiting room is shared by Guardians and players. It shows:
 **Player presence:** there is no "Leave game" button. A player is automatically removed from the participant list when
 they close the browser window or tab (WebSocket disconnect).
 
+**Guardian absence:** if the Guardian disconnects (tab/window close), all remaining players see a prominent warning
+indicating that the game cannot start without the Guardian. The warning disappears if the Guardian reconnects
+(e.g. via the magic link).
+
 **Guardian controls:** the Guardian can kick any player from the waiting room. A kicked player is redirected to an
 error page explaining they have been removed.
 
@@ -80,6 +84,7 @@ Note: starting the game is out of scope for this spec (future spec).
 | Wrong password                    | Inline error on the password field; retry allowed (no lockout)                  |
 | Duplicate player names            | Allowed — names are display-only, not unique identifiers                        |
 | Game already started              | Error message: "This game has already started"                                  |
+| Guardian disconnects from waiting room        | Remaining players see a warning: game cannot start without the Guardian |
 | Orphaned game (Guardian left, no magic link) | Game auto-expires after 24 hours of inactivity                       |
 | Player kicked by Guardian             | Kicked player is redirected to an error page: "You have been removed from the game" |
 | Player disconnects (tab/window close) | Player is removed from the participant list automatically via WebSocket disconnect   |
@@ -150,3 +155,4 @@ Note: no lockout on wrong passwords — game passwords are low-stakes (casual ga
 16. Forms are usable on mobile (< 768px)
 17. The waiting room user list updates within 2 seconds when a player disconnects (tab/window close)
 18. The Guardian can kick a player; the kicked player is redirected to a "removed from game" error page
+19. When the Guardian disconnects from the waiting room, remaining players see a warning that the game cannot start without the Guardian; the warning disappears if the Guardian reconnects
