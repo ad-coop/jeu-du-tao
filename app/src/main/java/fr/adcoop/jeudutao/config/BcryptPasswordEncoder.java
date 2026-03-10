@@ -1,11 +1,9 @@
-package fr.adcoop.jeudutao.service;
+package fr.adcoop.jeudutao.config;
 
 import fr.adcoop.jeudutao.application.port.PasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Component;
 
-@Component
-public class PasswordService implements PasswordEncoder {
+public class BcryptPasswordEncoder implements PasswordEncoder {
 
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 

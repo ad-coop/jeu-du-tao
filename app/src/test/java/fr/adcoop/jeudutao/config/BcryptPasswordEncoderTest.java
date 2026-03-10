@@ -1,44 +1,44 @@
-package fr.adcoop.jeudutao.service;
+package fr.adcoop.jeudutao.config;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class PasswordServiceTest {
+class BcryptPasswordEncoderTest {
 
-    private PasswordService passwordService;
+    private BcryptPasswordEncoder encoder;
 
     @BeforeEach
     void setUp() {
-        passwordService = new PasswordService();
+        encoder = new BcryptPasswordEncoder();
     }
 
     @Test
     void encode_returnsNonNullHash() {
-        var hash = passwordService.encode("secret");
+        var hash = encoder.encode("secret");
 
         assertThat(hash).isNotNull().isNotBlank();
     }
 
     @Test
     void encode_doesNotReturnPlainText() {
-        var hash = passwordService.encode("secret");
+        var hash = encoder.encode("secret");
 
         assertThat(hash).isNotEqualTo("secret");
     }
 
     @Test
     void matches_withCorrectPassword_returnsTrue() {
-        var hash = passwordService.encode("secret");
+        var hash = encoder.encode("secret");
 
-        assertThat(passwordService.matches("secret", hash)).isTrue();
+        assertThat(encoder.matches("secret", hash)).isTrue();
     }
 
     @Test
     void matches_withWrongPassword_returnsFalse() {
-        var hash = passwordService.encode("secret");
+        var hash = encoder.encode("secret");
 
-        assertThat(passwordService.matches("wrong", hash)).isFalse();
+        assertThat(encoder.matches("wrong", hash)).isFalse();
     }
 }

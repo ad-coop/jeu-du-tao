@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ApplicationConfig {
+public class UseCaseConfig {
 
     @Bean
     public GameService gameService(
@@ -21,5 +21,20 @@ public class ApplicationConfig {
             MagicLinkSender magicLinkSender
     ) {
         return new GameService(gameRepository, playerRepository, handleGenerator, passwordEncoder, magicLinkSender);
+    }
+
+    @Bean
+    public HandleGenerator handleGenerator() {
+        return new HandleGenerator();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BcryptPasswordEncoder();
+    }
+
+    @Bean
+    public MagicLinkSender magicLinkSender() {
+        return new LoggingMagicLinkSender();
     }
 }

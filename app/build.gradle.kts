@@ -16,11 +16,13 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-liquibase")
     testImplementation("org.springframework.boot:spring-boot-starter-liquibase-test")
 
-    implementation(project(":application"))
     implementation(project(":domain"))
-    implementation(project(":app-backend"))
+    implementation(project(":application"))
     implementation(project(":infra-persistence"))
     implementation(project(":infra-web-backend"))
+
+    implementation("org.springframework.security:spring-security-crypto")
+
     frontendDist(project(path = ":app-frontend", configuration = "frontendDist"))
 
     implementation("com.h2database:h2")

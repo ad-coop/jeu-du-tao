@@ -1,14 +1,12 @@
-package fr.adcoop.jeudutao.service;
+package fr.adcoop.jeudutao.config;
 
 import fr.adcoop.jeudutao.application.port.MagicLinkSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-@Component
-public class MagicLinkService implements MagicLinkSender {
+public class LoggingMagicLinkSender implements MagicLinkSender {
 
-    private static final Logger log = LoggerFactory.getLogger(MagicLinkService.class);
+    private static final Logger log = LoggerFactory.getLogger(LoggingMagicLinkSender.class);
 
     // TODO: replace with actual email sending implementation
     @Override
