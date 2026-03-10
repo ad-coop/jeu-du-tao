@@ -16,6 +16,8 @@ dependencies {
     implementation(project(":app-backend"))
     frontendDist(project(path = ":app-frontend", configuration = "frontendDist"))
 
+    runtimeOnly("com.h2database:h2")
+
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 }
 

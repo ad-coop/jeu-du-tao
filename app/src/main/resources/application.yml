@@ -2,6 +2,10 @@ server:
   port: 8080
 
 spring:
+  datasource:
+    url: jdbc:h2:mem:jeudutao;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
   web:
     resources:
       add-mappings: false

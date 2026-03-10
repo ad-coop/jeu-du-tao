@@ -1,19 +1,46 @@
 package fr.adcoop.jeudutao.repository;
 
+import fr.adcoop.jeudutao.domain.Game;
+import fr.adcoop.jeudutao.domain.GameState;
 import fr.adcoop.jeudutao.domain.Player;
 import fr.adcoop.jeudutao.domain.PlayerRole;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class InMemoryPlayerRepositoryTest {
+class JdbcPlayerRepositoryTest {
 
-    private InMemoryPlayerRepository repository;
+    private EmbeddedDatabase db;
+    private JdbcPlayerRepository repository;
 
     @BeforeEach
     void setUp() {
-        repository = new InMemoryPlayerRepository();
+        db = new EmbeddedDatabaseBuilder()
+                .generateUniqueName(true)
+                .setType(EmbeddedDatabaseType.H2)
+                .addScript("classpath:schema.sql")
+                .build();
+        var jdbcClient = JdbcClient.create(db);
+        var gameRepository = new JdbcGameRepository(jdbcClient);
+        repository = new JdbcPlayerRepository(jdbcClient);
+
+        var createdAt = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        gameRepository.save(new Game("GAME01", null, createdAt, GameState.WAITING, "guardian-id", null, null, null));
+        gameRepository.save(new Game("OTHER1", null, createdAt, GameState.WAITING, "guardian-id", null, null, null));
+    }
+
+    @AfterEach
+    void tearDown() {
+        db.shutdown();
     }
 
     @Test
@@ -47,9 +74,7 @@ class InMemoryPlayerRepositoryTest {
         repository.save(player2);
         repository.save(otherPlayer);
 
-        var result = repository.findByGameHandle("GAME01");
-
-        assertThat(result).containsExactlyInAnyOrder(player1, player2);
+        assertThat(repository.findByGameHandle("GAME01")).containsExactlyInAnyOrder(player1, player2);
     }
 
     @Test
