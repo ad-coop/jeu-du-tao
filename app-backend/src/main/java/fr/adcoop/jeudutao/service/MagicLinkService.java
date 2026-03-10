@@ -22,6 +22,6 @@ public class MagicLinkService {
 
     // TODO: replace with actual email sending implementation
     public void sendLink(String email, String handle, String token) {
-        log.info("Magic link for game {}: /game/{}/restore?token={}", handle, handle, token);
+        log.info("Magic link for game {}: /game/{}?token={}", handle, handle, token);
     }
 }

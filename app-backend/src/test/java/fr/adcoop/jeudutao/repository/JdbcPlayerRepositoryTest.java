@@ -4,6 +4,12 @@ import fr.adcoop.jeudutao.domain.Game;
 import fr.adcoop.jeudutao.domain.GameState;
 import fr.adcoop.jeudutao.domain.Player;
 import fr.adcoop.jeudutao.domain.PlayerRole;
+import liquibase.Contexts;
+import liquibase.LabelExpression;
+import liquibase.Liquibase;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,19 +29,25 @@ class JdbcPlayerRepositoryTest {
     private JdbcPlayerRepository repository;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         db = new EmbeddedDatabaseBuilder()
                 .generateUniqueName(true)
                 .setType(EmbeddedDatabaseType.H2)
-                .addScript("classpath:schema.sql")
                 .build();
+        try (var liquibase = new Liquibase(
+                "db/changelog/db.changelog-master.yaml",
+                new ClassLoaderResourceAccessor(),
+                DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(db.getConnection()))
+        )) {
+            liquibase.update(new Contexts(), new LabelExpression());
+        }
         var jdbcClient = JdbcClient.create(db);
         var gameRepository = new JdbcGameRepository(jdbcClient);
         repository = new JdbcPlayerRepository(jdbcClient);
 
         var createdAt = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-        gameRepository.save(new Game("GAME01", null, createdAt, GameState.WAITING, "guardian-id", null, null, null));
-        gameRepository.save(new Game("OTHER1", null, createdAt, GameState.WAITING, "guardian-id", null, null, null));
+        gameRepository.save(new Game("GAME01", null, createdAt, GameState.WAITING, "guardian-id", "Alice", null, null, null));
+        gameRepository.save(new Game("OTHER1", null, createdAt, GameState.WAITING, "guardian-id", "Alice", null, null, null));
     }
 
     @AfterEach

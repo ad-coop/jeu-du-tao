@@ -8,6 +8,7 @@ public record Game(
         Instant createdAt,
         GameState state,
         String guardianId,
+        String guardianName,
         String magicLinkToken,
         Instant magicLinkExpiry,
         String email

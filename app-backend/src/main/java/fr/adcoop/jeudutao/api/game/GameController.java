@@ -107,6 +107,18 @@ public class GameController {
                 .toList();
     }
 
+    @PostMapping("/{handle}/restore")
+    public RestoreGameResponse restoreGame(
+            @PathVariable("handle") String handle,
+            @RequestBody RestoreGameRequest request
+    ) {
+        validateHandle(handle);
+        var result = gameService.restoreGuardian(handle, request.token());
+        broadcastPlayerList(handle);
+        var game = gameService.getGameInfo(handle);
+        return new RestoreGameResponse(result.playerId(), result.playerName(), game.passwordHash() != null, game.email() != null);
+    }
+
     @DeleteMapping("/{handle}/players/{playerId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void kickPlayer(

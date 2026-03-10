@@ -1,5 +1,6 @@
 plugins {
     id("jeudutao.java-conventions")
+    id("io.spring.dependency-management")
 }
 
 tasks.named("jar") {
@@ -12,6 +13,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("org.springframework.security:spring-security-crypto")
+    implementation("org.liquibase:liquibase-core")
 
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testRuntimeOnly("com.h2database:h2")

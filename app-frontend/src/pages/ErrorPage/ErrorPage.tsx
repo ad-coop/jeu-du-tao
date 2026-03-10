@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router";
 import { useTranslation } from "../../i18n";
 import styles from "./ErrorPage.module.css";
 
-type ErrorType = "not-found" | "already-started" | "kicked";
+type ErrorType = "not-found" | "already-started" | "kicked" | "invalid-magic-link";
 
 type ErrorPageProps = {
   errorType?: ErrorType;
@@ -12,6 +12,7 @@ const ERROR_KEYS: Record<ErrorType, string> = {
   "not-found": "game.error.notFound",
   "already-started": "game.error.alreadyStarted",
   kicked: "game.error.kicked",
+  "invalid-magic-link": "game.error.invalidMagicLink",
 };
 
 export function ErrorPage({ errorType: propErrorType }: ErrorPageProps) {
@@ -22,7 +23,8 @@ export function ErrorPage({ errorType: propErrorType }: ErrorPageProps) {
   const resolvedErrorType: ErrorType =
     rawErrorType === "not-found" ||
     rawErrorType === "already-started" ||
-    rawErrorType === "kicked"
+    rawErrorType === "kicked" ||
+    rawErrorType === "invalid-magic-link"
       ? rawErrorType
       : "not-found";
 

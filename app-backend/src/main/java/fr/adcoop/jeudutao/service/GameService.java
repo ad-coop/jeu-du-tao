@@ -6,6 +6,7 @@ import fr.adcoop.jeudutao.domain.Player;
 import fr.adcoop.jeudutao.domain.PlayerRole;
 import fr.adcoop.jeudutao.exception.GameAlreadyStartedException;
 import fr.adcoop.jeudutao.exception.GameNotFoundException;
+import fr.adcoop.jeudutao.exception.InvalidMagicLinkException;
 import fr.adcoop.jeudutao.exception.InvalidPasswordException;
 import fr.adcoop.jeudutao.exception.PlayerNotFoundException;
 import fr.adcoop.jeudutao.exception.UnauthorizedKickException;
@@ -13,6 +14,8 @@ import fr.adcoop.jeudutao.repository.GameRepository;
 import fr.adcoop.jeudutao.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -25,6 +28,9 @@ public class GameService {
     }
 
     public record JoinGameResult(Player player) {
+    }
+
+    public record RestoreResult(String playerId, String playerName) {
     }
 
     private final GameRepository gameRepository;
@@ -65,6 +71,7 @@ public class GameService {
                 Instant.now(),
                 GameState.WAITING,
                 guardianId,
+                userName,
                 magicLinkToken,
                 magicLinkExpiry,
                 email
@@ -132,5 +139,29 @@ public class GameService {
     public Game getGameInfo(String handle) {
         return gameRepository.findByHandle(handle)
                 .orElseThrow(() -> new GameNotFoundException(handle));
+    }
+
+    public RestoreResult restoreGuardian(String handle, String token) {
+        var game = gameRepository.findByHandle(handle)
+                .orElseThrow(() -> new GameNotFoundException(handle));
+
+        if (game.magicLinkToken() == null
+                || !MessageDigest.isEqual(
+                        game.magicLinkToken().getBytes(StandardCharsets.UTF_8),
+                        token.getBytes(StandardCharsets.UTF_8))
+                || !Instant.now().isBefore(game.magicLinkExpiry())) {
+            throw new InvalidMagicLinkException();
+        }
+
+        var guardian = playerRepository.findById(game.guardianId())
+                .orElseGet(() -> {
+                    var recreated = new Player(game.guardianId(), game.guardianName(), PlayerRole.GUARDIAN, handle);
+                    playerRepository.save(recreated);
+                    return recreated;
+                });
+
+        gameRepository.clearMagicLinkToken(handle);
+
+        return new RestoreResult(guardian.id(), guardian.name());
     }
 }

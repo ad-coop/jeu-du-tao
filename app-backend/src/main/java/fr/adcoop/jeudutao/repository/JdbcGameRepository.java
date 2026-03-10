@@ -22,15 +22,16 @@ public class JdbcGameRepository implements GameRepository {
     @Override
     public void save(Game game) {
         jdbcClient.sql("""
-                MERGE INTO games (handle, password_hash, created_at, state, guardian_id, magic_link_token, magic_link_expiry, email)
+                MERGE INTO games (handle, password_hash, created_at, state, guardian_id, guardian_name, magic_link_token, magic_link_expiry, email)
                 KEY (handle)
-                VALUES (:handle, :passwordHash, :createdAt, :state, :guardianId, :magicLinkToken, :magicLinkExpiry, :email)
+                VALUES (:handle, :passwordHash, :createdAt, :state, :guardianId, :guardianName, :magicLinkToken, :magicLinkExpiry, :email)
                 """)
                 .param("handle", game.handle())
                 .param("passwordHash", game.passwordHash())
                 .param("createdAt", Timestamp.from(game.createdAt()))
                 .param("state", game.state().name())
                 .param("guardianId", game.guardianId())
+                .param("guardianName", game.guardianName())
                 .param("magicLinkToken", game.magicLinkToken())
                 .param("magicLinkExpiry", game.magicLinkExpiry() != null ? Timestamp.from(game.magicLinkExpiry()) : null)
                 .param("email", game.email())
@@ -53,6 +54,13 @@ public class JdbcGameRepository implements GameRepository {
                 .single() > 0;
     }
 
+    @Override
+    public void clearMagicLinkToken(String handle) {
+        jdbcClient.sql("UPDATE games SET magic_link_token = NULL, magic_link_expiry = NULL WHERE handle = :handle")
+                .param("handle", handle)
+                .update();
+    }
+
     private static Game mapRow(ResultSet rs, int rowNum) throws SQLException {
         var magicLinkExpiry = rs.getTimestamp("magic_link_expiry");
         return new Game(
@@ -61,6 +69,7 @@ public class JdbcGameRepository implements GameRepository {
                 rs.getTimestamp("created_at").toInstant(),
                 GameState.valueOf(rs.getString("state")),
                 rs.getString("guardian_id"),
+                rs.getString("guardian_name"),
                 rs.getString("magic_link_token"),
                 magicLinkExpiry != null ? magicLinkExpiry.toInstant() : null,
                 rs.getString("email")

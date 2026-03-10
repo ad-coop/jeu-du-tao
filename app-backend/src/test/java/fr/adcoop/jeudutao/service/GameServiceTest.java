@@ -6,6 +6,7 @@ import fr.adcoop.jeudutao.domain.Player;
 import fr.adcoop.jeudutao.domain.PlayerRole;
 import fr.adcoop.jeudutao.exception.GameAlreadyStartedException;
 import fr.adcoop.jeudutao.exception.GameNotFoundException;
+import fr.adcoop.jeudutao.exception.InvalidMagicLinkException;
 import fr.adcoop.jeudutao.exception.InvalidPasswordException;
 import fr.adcoop.jeudutao.exception.PlayerNotFoundException;
 import fr.adcoop.jeudutao.exception.UnauthorizedKickException;
@@ -13,8 +14,10 @@ import fr.adcoop.jeudutao.repository.GameRepository;
 import fr.adcoop.jeudutao.repository.PlayerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -207,7 +210,89 @@ class GameServiceTest {
         assertThat(result).isEqualTo(players);
     }
 
+    @Test
+    void restoreGuardian_whenTokenValid_returnsGuardianInfo() {
+        var token = "valid-token";
+        var expiry = Instant.now().plus(1, ChronoUnit.HOURS);
+        var game = gameWithMagicLink(token, expiry);
+        var guardian = new Player("guardian-id", "Alice", PlayerRole.GUARDIAN, "GAME01");
+        when(gameRepository.findByHandle("GAME01")).thenReturn(Optional.of(game));
+        when(playerRepository.findById("guardian-id")).thenReturn(Optional.of(guardian));
+
+        var result = gameService.restoreGuardian("GAME01", token);
+
+        assertThat(result.playerId()).isEqualTo("guardian-id");
+        assertThat(result.playerName()).isEqualTo("Alice");
+    }
+
+    @Test
+    void restoreGuardian_whenTokenExpired_throwsInvalidMagicLinkException() {
+        var token = "expired-token";
+        var expiry = Instant.now().minus(1, ChronoUnit.HOURS);
+        var game = gameWithMagicLink(token, expiry);
+        when(gameRepository.findByHandle("GAME01")).thenReturn(Optional.of(game));
+
+        assertThatThrownBy(() -> gameService.restoreGuardian("GAME01", token))
+                .isInstanceOf(InvalidMagicLinkException.class);
+    }
+
+    @Test
+    void restoreGuardian_whenTokenMismatch_throwsInvalidMagicLinkException() {
+        var token = "correct-token";
+        var expiry = Instant.now().plus(1, ChronoUnit.HOURS);
+        var game = gameWithMagicLink(token, expiry);
+        when(gameRepository.findByHandle("GAME01")).thenReturn(Optional.of(game));
+
+        assertThatThrownBy(() -> gameService.restoreGuardian("GAME01", "wrong-token"))
+                .isInstanceOf(InvalidMagicLinkException.class);
+    }
+
+    @Test
+    void restoreGuardian_whenNoToken_throwsInvalidMagicLinkException() {
+        var game = new Game("GAME01", null, Instant.now(), GameState.WAITING, "guardian-id", "Alice", null, null, null);
+        when(gameRepository.findByHandle("GAME01")).thenReturn(Optional.of(game));
+
+        assertThatThrownBy(() -> gameService.restoreGuardian("GAME01", "any-token"))
+                .isInstanceOf(InvalidMagicLinkException.class);
+    }
+
+    @Test
+    void restoreGuardian_invalidatesTokenAfterUse() {
+        var token = "valid-token";
+        var expiry = Instant.now().plus(1, ChronoUnit.HOURS);
+        var game = gameWithMagicLink(token, expiry);
+        var guardian = new Player("guardian-id", "Alice", PlayerRole.GUARDIAN, "GAME01");
+        when(gameRepository.findByHandle("GAME01")).thenReturn(Optional.of(game));
+        when(playerRepository.findById("guardian-id")).thenReturn(Optional.of(guardian));
+
+        gameService.restoreGuardian("GAME01", token);
+
+        verify(gameRepository).clearMagicLinkToken("GAME01");
+    }
+
+    @Test
+    void restoreGuardian_whenPlayerDeleted_recreatesGuardianFromStoredName() {
+        var token = "valid-token";
+        var expiry = Instant.now().plus(1, ChronoUnit.HOURS);
+        var game = gameWithMagicLink(token, expiry);
+        when(gameRepository.findByHandle("GAME01")).thenReturn(Optional.of(game));
+        when(playerRepository.findById("guardian-id")).thenReturn(Optional.empty());
+
+        var result = gameService.restoreGuardian("GAME01", token);
+
+        assertThat(result.playerName()).isEqualTo("Alice");
+        var captor = ArgumentCaptor.forClass(Player.class);
+        verify(playerRepository).save(captor.capture());
+        assertThat(captor.getValue().id()).isEqualTo("guardian-id");
+        assertThat(captor.getValue().name()).isEqualTo("Alice");
+        assertThat(captor.getValue().role()).isEqualTo(PlayerRole.GUARDIAN);
+    }
+
+    private Game gameWithMagicLink(String token, Instant expiry) {
+        return new Game("GAME01", null, Instant.now(), GameState.WAITING, "guardian-id", "Alice", token, expiry, null);
+    }
+
     private Game gameWithState(String handle, GameState state, String passwordHash) {
-        return new Game(handle, passwordHash, Instant.now(), state, "guardian-id", null, null, null);
+        return new Game(handle, passwordHash, Instant.now(), state, "guardian-id", "Alice", null, null, null);
     }
 }

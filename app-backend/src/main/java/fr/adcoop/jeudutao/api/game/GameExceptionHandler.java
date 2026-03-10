@@ -2,6 +2,7 @@ package fr.adcoop.jeudutao.api.game;
 
 import fr.adcoop.jeudutao.exception.GameAlreadyStartedException;
 import fr.adcoop.jeudutao.exception.GameNotFoundException;
+import fr.adcoop.jeudutao.exception.InvalidMagicLinkException;
 import fr.adcoop.jeudutao.exception.InvalidPasswordException;
 import fr.adcoop.jeudutao.exception.PlayerNotFoundException;
 import fr.adcoop.jeudutao.exception.RateLimitExceededException;
@@ -24,6 +25,12 @@ public class GameExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorResponse handleInvalidPassword(InvalidPasswordException ex) {
         return new ErrorResponse("game.invalidPassword", ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidMagicLinkException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleInvalidMagicLink(InvalidMagicLinkException ex) {
+        return new ErrorResponse("game.invalidMagicLink", ex.getMessage());
     }
 
     @ExceptionHandler(GameAlreadyStartedException.class)

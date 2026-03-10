@@ -60,4 +60,10 @@ describe("ErrorPage", () => {
 
     expect(screen.getByText("game.error.notFound")).toBeInTheDocument();
   });
+
+  it("render_whenInvalidMagicLinkParam_showsInvalidMagicLinkMessage", () => {
+    renderWithRoute("invalid-magic-link");
+
+    expect(screen.getByText("game.error.invalidMagicLink")).toBeInTheDocument();
+  });
 });

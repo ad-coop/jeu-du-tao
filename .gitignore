@@ -1,23 +1,39 @@
 # Gradle
 .gradle/
 build/
+bin/
 !gradle/wrapper/gradle-wrapper.jar
 
-# IDE
-.idea/
+# IntelliJ IDEA
+.idea/*
+!.idea/vcs.xml
 *.iml
-.vscode/
-*.class
+*.iws
+*.ipr
+out/
 
-# Environment
-.env
-.env.*
-!.env.example
+#Eclipse
+.project
+.settings
+.classpath
 
-# Frontend
-app-frontend/node_modules/
-app-frontend/dist/
+# Node.js / pnpm
+node_modules/
+dist/
+
+# Spring Boot
+*.log
+*.pid
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Local configuration
+*.local.*
+application-local.yml
+application-local.properties
+
+# Claude
+.claude/worktrees
+.claire

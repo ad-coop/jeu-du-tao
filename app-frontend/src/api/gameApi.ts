@@ -43,6 +43,13 @@ export type PlayerInfo = {
   role: string;
 };
 
+export type RestoreGameResponse = {
+  playerId: string;
+  playerName: string;
+  passwordProtected: boolean;
+  hasEmail: boolean;
+};
+
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     let code = "UNKNOWN_ERROR";
@@ -86,6 +93,15 @@ export const gameApi = {
   getPlayers: async (handle: string): Promise<PlayerInfo[]> => {
     const response = await fetch(`/api/games/${encodeURIComponent(handle)}/players`);
     return handleResponse<PlayerInfo[]>(response);
+  },
+
+  restoreGame: async (handle: string, token: string): Promise<RestoreGameResponse> => {
+    const response = await fetch(`/api/games/${encodeURIComponent(handle)}/restore`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
+    return handleResponse<RestoreGameResponse>(response);
   },
 
   kickPlayer: async (

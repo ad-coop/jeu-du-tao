@@ -2,6 +2,12 @@ package fr.adcoop.jeudutao.repository;
 
 import fr.adcoop.jeudutao.domain.Game;
 import fr.adcoop.jeudutao.domain.GameState;
+import liquibase.Contexts;
+import liquibase.LabelExpression;
+import liquibase.Liquibase;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,12 +27,18 @@ class JdbcGameRepositoryTest {
     private JdbcGameRepository repository;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         db = new EmbeddedDatabaseBuilder()
                 .generateUniqueName(true)
                 .setType(EmbeddedDatabaseType.H2)
-                .addScript("classpath:schema.sql")
                 .build();
+        try (var liquibase = new Liquibase(
+                "db/changelog/db.changelog-master.yaml",
+                new ClassLoaderResourceAccessor(),
+                DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(db.getConnection()))
+        )) {
+            liquibase.update(new Contexts(), new LabelExpression());
+        }
         repository = new JdbcGameRepository(JdbcClient.create(db));
     }
 
@@ -52,7 +64,7 @@ class JdbcGameRepositoryTest {
     @Test
     void save_overwritesExisting() {
         var game1 = aGame("ABC123");
-        var game2 = new Game("ABC123", null, Instant.now().truncatedTo(ChronoUnit.MILLIS), GameState.STARTED, "other-id", null, null, null);
+        var game2 = new Game("ABC123", null, Instant.now().truncatedTo(ChronoUnit.MILLIS), GameState.STARTED, "other-id", "Bob", null, null, null);
 
         repository.save(game1);
         repository.save(game2);
@@ -72,7 +84,20 @@ class JdbcGameRepositoryTest {
         assertThat(repository.existsByHandle("ABC123")).isTrue();
     }
 
+    @Test
+    void clearMagicLinkToken_setsFieldsToNull() {
+        var game = new Game("ABC123", null, Instant.now().truncatedTo(ChronoUnit.MILLIS), GameState.WAITING, "guardian-id", "Alice", "some-token", Instant.now().truncatedTo(ChronoUnit.MILLIS).plus(1, ChronoUnit.DAYS), null);
+        repository.save(game);
+
+        repository.clearMagicLinkToken("ABC123");
+
+        var found = repository.findByHandle("ABC123");
+        assertThat(found).isPresent();
+        assertThat(found.get().magicLinkToken()).isNull();
+        assertThat(found.get().magicLinkExpiry()).isNull();
+    }
+
     private Game aGame(String handle) {
-        return new Game(handle, null, Instant.now().truncatedTo(ChronoUnit.MILLIS), GameState.WAITING, "guardian-id", null, null, null);
+        return new Game(handle, null, Instant.now().truncatedTo(ChronoUnit.MILLIS), GameState.WAITING, "guardian-id", "Alice", null, null, null);
     }
 }

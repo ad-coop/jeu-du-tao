@@ -4,6 +4,7 @@ import fr.adcoop.jeudutao.domain.Game;
 import fr.adcoop.jeudutao.domain.GameState;
 import fr.adcoop.jeudutao.domain.Player;
 import fr.adcoop.jeudutao.domain.PlayerRole;
+import fr.adcoop.jeudutao.exception.InvalidMagicLinkException;
 import fr.adcoop.jeudutao.service.GameService;
 import fr.adcoop.jeudutao.service.RateLimiter;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +53,7 @@ class GameControllerTest {
 
     @Test
     void createGame_withValidRequest_returns201WithGameDetails() throws Exception {
-        var game = new Game("GAME01", null, Instant.now(), GameState.WAITING, "guardian-id", null, null, null);
+        var game = new Game("GAME01", null, Instant.now(), GameState.WAITING, "guardian-id", "Alice", null, null, null);
         var guardian = new Player("guardian-id", "Alice", PlayerRole.GUARDIAN, "GAME01");
         when(gameService.createGame("Alice", null, null)).thenReturn(new GameService.CreateGameResult(game, guardian));
         when(gameService.getPlayers("GAME01")).thenReturn(List.of(guardian));
@@ -71,7 +72,7 @@ class GameControllerTest {
 
     @Test
     void createGame_withEmail_returnsHasEmailTrue() throws Exception {
-        var game = new Game("GAME01", null, Instant.now(), GameState.WAITING, "guardian-id", null, null, "alice@example.com");
+        var game = new Game("GAME01", null, Instant.now(), GameState.WAITING, "guardian-id", "Alice", null, null, "alice@example.com");
         var guardian = new Player("guardian-id", "Alice", PlayerRole.GUARDIAN, "GAME01");
         when(gameService.createGame("Alice", "alice@example.com", null)).thenReturn(new GameService.CreateGameResult(game, guardian));
         when(gameService.getPlayers("GAME01")).thenReturn(List.of(guardian));
@@ -116,7 +117,7 @@ class GameControllerTest {
 
     @Test
     void getGameInfo_withValidHandle_returns200() throws Exception {
-        var game = new Game("GAME01", null, Instant.now(), GameState.WAITING, "guardian-id", null, null, null);
+        var game = new Game("GAME01", null, Instant.now(), GameState.WAITING, "guardian-id", "Alice", null, null, null);
         when(gameService.getGameInfo("GAME01")).thenReturn(game);
 
         mockMvc.perform(get("/api/games/GAME01"))
@@ -184,5 +185,38 @@ class GameControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(gameService).kickPlayer("GAME01", "guardian-id", "player-id");
+    }
+
+    @Test
+    void restoreGame_returns200WithGuardianInfo() throws Exception {
+        var restoreResult = new GameService.RestoreResult("guardian-id", "Alice");
+        var game = new Game("GAME01", null, Instant.now(), GameState.WAITING, "guardian-id", "Alice", null, null, "alice@example.com");
+        when(gameService.restoreGuardian("GAME01", "valid-token")).thenReturn(restoreResult);
+        when(gameService.getGameInfo("GAME01")).thenReturn(game);
+        when(gameService.getPlayers("GAME01")).thenReturn(List.of());
+
+        mockMvc.perform(post("/api/games/GAME01/restore")
+                        .contentType("application/json")
+                        .content("""
+                                {"token": "valid-token"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.playerId").value("guardian-id"))
+                .andExpect(jsonPath("$.playerName").value("Alice"))
+                .andExpect(jsonPath("$.passwordProtected").value(false))
+                .andExpect(jsonPath("$.hasEmail").value(true));
+    }
+
+    @Test
+    void restoreGame_whenInvalidToken_returns401() throws Exception {
+        when(gameService.restoreGuardian("GAME01", "bad-token")).thenThrow(new InvalidMagicLinkException());
+
+        mockMvc.perform(post("/api/games/GAME01/restore")
+                        .contentType("application/json")
+                        .content("""
+                                {"token": "bad-token"}
+                                """))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("game.invalidMagicLink"));
     }
 }
