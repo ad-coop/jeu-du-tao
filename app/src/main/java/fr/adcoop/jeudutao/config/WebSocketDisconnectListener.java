@@ -1,7 +1,7 @@
 package fr.adcoop.jeudutao.config;
 
 import fr.adcoop.jeudutao.api.game.PlayerInfo;
-import fr.adcoop.jeudutao.repository.PlayerRepository;
+import fr.adcoop.jeudutao.domain.game.port.PlayerRepository;
 import fr.adcoop.jeudutao.service.GameService;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

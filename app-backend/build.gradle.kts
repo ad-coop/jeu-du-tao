@@ -7,6 +7,7 @@ tasks.named("jar") {
 }
 
 dependencies {
+    implementation(project(":domain"))
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     implementation("org.springframework.boot:spring-boot-starter-websocket")

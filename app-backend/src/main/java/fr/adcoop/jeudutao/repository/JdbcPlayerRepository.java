@@ -1,7 +1,8 @@
 package fr.adcoop.jeudutao.repository;
 
-import fr.adcoop.jeudutao.domain.Player;
-import fr.adcoop.jeudutao.domain.PlayerRole;
+import fr.adcoop.jeudutao.domain.game.Player;
+import fr.adcoop.jeudutao.domain.game.PlayerRole;
+import fr.adcoop.jeudutao.domain.game.port.PlayerRepository;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 

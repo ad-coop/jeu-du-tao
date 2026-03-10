@@ -1,17 +1,13 @@
-package fr.adcoop.jeudutao.repository;
+package fr.adcoop.jeudutao.domain.game.port;
 
-import fr.adcoop.jeudutao.domain.Player;
+import fr.adcoop.jeudutao.domain.game.Player;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface PlayerRepository {
-
     void save(Player player);
-
     Optional<Player> findById(String id);
-
     List<Player> findByGameHandle(String gameHandle);
-
     void deleteById(String id);
 }

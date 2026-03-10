@@ -1,6 +1,6 @@
 package fr.adcoop.jeudutao.api.game;
 
-import fr.adcoop.jeudutao.domain.Player;
+import fr.adcoop.jeudutao.domain.game.Player;
 
 import java.util.Locale;
 

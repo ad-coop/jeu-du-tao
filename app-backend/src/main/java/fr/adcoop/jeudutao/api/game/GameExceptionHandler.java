@@ -1,12 +1,12 @@
 package fr.adcoop.jeudutao.api.game;
 
-import fr.adcoop.jeudutao.exception.GameAlreadyStartedException;
-import fr.adcoop.jeudutao.exception.GameNotFoundException;
-import fr.adcoop.jeudutao.exception.InvalidMagicLinkException;
-import fr.adcoop.jeudutao.exception.InvalidPasswordException;
-import fr.adcoop.jeudutao.exception.PlayerNotFoundException;
+import fr.adcoop.jeudutao.domain.game.exception.GameAlreadyStartedException;
+import fr.adcoop.jeudutao.domain.game.exception.GameNotFoundException;
+import fr.adcoop.jeudutao.domain.game.exception.InvalidMagicLinkException;
+import fr.adcoop.jeudutao.domain.game.exception.InvalidPasswordException;
+import fr.adcoop.jeudutao.domain.game.exception.PlayerNotFoundException;
 import fr.adcoop.jeudutao.exception.RateLimitExceededException;
-import fr.adcoop.jeudutao.exception.UnauthorizedKickException;
+import fr.adcoop.jeudutao.domain.game.exception.UnauthorizedKickException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;

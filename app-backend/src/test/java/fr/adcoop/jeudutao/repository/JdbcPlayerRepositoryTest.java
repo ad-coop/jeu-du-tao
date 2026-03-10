@@ -1,9 +1,9 @@
 package fr.adcoop.jeudutao.repository;
 
-import fr.adcoop.jeudutao.domain.Game;
-import fr.adcoop.jeudutao.domain.GameState;
-import fr.adcoop.jeudutao.domain.Player;
-import fr.adcoop.jeudutao.domain.PlayerRole;
+import fr.adcoop.jeudutao.domain.game.Game;
+import fr.adcoop.jeudutao.domain.game.GameState;
+import fr.adcoop.jeudutao.domain.game.Player;
+import fr.adcoop.jeudutao.domain.game.PlayerRole;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;

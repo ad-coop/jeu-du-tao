@@ -1,17 +1,18 @@
 package fr.adcoop.jeudutao.service;
 
-import fr.adcoop.jeudutao.domain.Game;
-import fr.adcoop.jeudutao.domain.GameState;
-import fr.adcoop.jeudutao.domain.Player;
-import fr.adcoop.jeudutao.domain.PlayerRole;
-import fr.adcoop.jeudutao.exception.GameAlreadyStartedException;
-import fr.adcoop.jeudutao.exception.GameNotFoundException;
-import fr.adcoop.jeudutao.exception.InvalidMagicLinkException;
-import fr.adcoop.jeudutao.exception.InvalidPasswordException;
-import fr.adcoop.jeudutao.exception.PlayerNotFoundException;
-import fr.adcoop.jeudutao.exception.UnauthorizedKickException;
-import fr.adcoop.jeudutao.repository.GameRepository;
-import fr.adcoop.jeudutao.repository.PlayerRepository;
+import fr.adcoop.jeudutao.domain.game.Game;
+import fr.adcoop.jeudutao.domain.game.GameState;
+import fr.adcoop.jeudutao.domain.game.HandleGenerator;
+import fr.adcoop.jeudutao.domain.game.Player;
+import fr.adcoop.jeudutao.domain.game.PlayerRole;
+import fr.adcoop.jeudutao.domain.game.exception.GameAlreadyStartedException;
+import fr.adcoop.jeudutao.domain.game.exception.GameNotFoundException;
+import fr.adcoop.jeudutao.domain.game.exception.InvalidMagicLinkException;
+import fr.adcoop.jeudutao.domain.game.exception.InvalidPasswordException;
+import fr.adcoop.jeudutao.domain.game.exception.PlayerNotFoundException;
+import fr.adcoop.jeudutao.domain.game.exception.UnauthorizedKickException;
+import fr.adcoop.jeudutao.domain.game.port.GameRepository;
+import fr.adcoop.jeudutao.domain.game.port.PlayerRepository;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;

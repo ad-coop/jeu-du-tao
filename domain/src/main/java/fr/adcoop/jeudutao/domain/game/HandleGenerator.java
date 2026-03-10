@@ -1,11 +1,8 @@
-package fr.adcoop.jeudutao.service;
-
-import org.springframework.stereotype.Component;
+package fr.adcoop.jeudutao.domain.game;
 
 import java.security.SecureRandom;
 import java.util.function.Predicate;
 
-@Component
 public class HandleGenerator {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

@@ -1,4 +1,4 @@
-package fr.adcoop.jeudutao.service;
+package fr.adcoop.jeudutao.domain.game;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,6 @@ class HandleGeneratorTest {
     @Test
     void generate_retriesOnCollision() {
         var callCount = new AtomicInteger(0);
-        // Reject first two attempts, accept third
         var handle = generator.generate(h -> callCount.incrementAndGet() >= 3);
 
         assertThat(callCount.get()).isEqualTo(3);

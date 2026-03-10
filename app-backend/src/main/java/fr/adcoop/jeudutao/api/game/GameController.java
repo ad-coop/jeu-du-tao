@@ -1,6 +1,6 @@
 package fr.adcoop.jeudutao.api.game;
 
-import fr.adcoop.jeudutao.exception.GameNotFoundException;
+import fr.adcoop.jeudutao.domain.game.exception.GameNotFoundException;
 import fr.adcoop.jeudutao.exception.RateLimitExceededException;
 import fr.adcoop.jeudutao.service.GameService;
 import fr.adcoop.jeudutao.service.RateLimiter;
