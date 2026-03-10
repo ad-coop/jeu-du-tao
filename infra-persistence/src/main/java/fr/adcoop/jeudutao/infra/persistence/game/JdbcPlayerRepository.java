@@ -1,4 +1,4 @@
-package fr.adcoop.jeudutao.repository;
+package fr.adcoop.jeudutao.infra.persistence.game;
 
 import fr.adcoop.jeudutao.domain.game.Player;
 import fr.adcoop.jeudutao.domain.game.PlayerRole;

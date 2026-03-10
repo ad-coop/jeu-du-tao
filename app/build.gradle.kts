@@ -21,6 +21,7 @@ dependencies {
     implementation(project(":application"))
     implementation(project(":domain"))
     implementation(project(":app-backend"))
+    implementation(project(":infra-persistence"))
     frontendDist(project(path = ":app-frontend", configuration = "frontendDist"))
 
     implementation("com.h2database:h2")

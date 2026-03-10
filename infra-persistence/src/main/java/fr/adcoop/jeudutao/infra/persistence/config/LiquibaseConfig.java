@@ -1,4 +1,4 @@
-package fr.adcoop.jeudutao.config;
+package fr.adcoop.jeudutao.infra.persistence.config;
 
 import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.beans.factory.annotation.Value;
