@@ -10,7 +10,7 @@ A collaborative game that harnesses collective intelligence to help participants
 
 ## Database
 
-The application uses an H2 file-based database stored in `data/jeudutao.mv.db` (excluded from git).
+The application uses an H2 file-based database stored in `app/data/jeudutao.mv.db` (excluded from git).
 
 On startup, H2 also starts a TCP server on port **9092**, allowing external connections while the app is running.
 

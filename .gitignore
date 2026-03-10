@@ -37,3 +37,6 @@ application-local.properties
 # Claude
 .claude/worktrees
 .claire
+
+# H2
+*.db
