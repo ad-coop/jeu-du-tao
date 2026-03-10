@@ -1,6 +1,5 @@
 plugins {
-    id("jeudutao.java-conventions")
-    id("io.spring.dependency-management")
+    id("jeudutao.java-spring-conventions")
 }
 
 tasks.named("jar") {
@@ -8,13 +7,16 @@ tasks.named("jar") {
 }
 
 dependencies {
-    implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
-    implementation("org.springframework.boot:spring-boot-starter-websocket")
-    implementation("org.springframework.boot:spring-boot-starter-jdbc")
-    implementation("org.springframework.security:spring-security-crypto")
-    implementation("org.liquibase:liquibase-core")
-
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+    testImplementation("org.springframework.boot:spring-boot-starter-websocket-test")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    testImplementation("org.springframework.boot:spring-boot-starter-jdbc-test")
+    implementation("org.springframework.boot:spring-boot-starter-liquibase")
+    testImplementation("org.springframework.boot:spring-boot-starter-liquibase-test")
+
+    implementation("org.springframework.security:spring-security-crypto")
+
     testRuntimeOnly("com.h2database:h2")
 }

@@ -1,7 +1,6 @@
 plugins {
-    id("jeudutao.java-conventions")
+    id("jeudutao.java-spring-conventions")
     id("org.springframework.boot")
-    id("io.spring.dependency-management")
 }
 
 val frontendDist by configurations.creating {
@@ -10,16 +9,20 @@ val frontendDist by configurations.creating {
 }
 
 dependencies {
-    implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
-    implementation("org.springframework.boot:spring-boot-starter-websocket")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
+    implementation("org.springframework.boot:spring-boot-starter-liquibase")
+    testImplementation("org.springframework.boot:spring-boot-starter-liquibase-test")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+    testImplementation("org.springframework.boot:spring-boot-starter-websocket-test")
+
     implementation(project(":app-backend"))
     frontendDist(project(path = ":app-frontend", configuration = "frontendDist"))
 
     implementation("com.h2database:h2")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 }
 
 val copyFrontend by tasks.registering(Sync::class) {
