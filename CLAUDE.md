@@ -39,6 +39,20 @@ A Guardian initiates the game, then invites other players to join.
 * For horizontal scaling reasons, their number is variable.
 * Each of them has to be able to respond to requests for any on-going game.
 
+## Module Structure
+
+```
+domain              — pure Java: Game, Player, port interfaces (GameRepository, PlayerRepository), exceptions
+application         — pure Java: GameService use case, PasswordEncoder/MagicLinkSender port interfaces
+infra-persistence   — Spring JDBC + Liquibase: JdbcGameRepository, JdbcPlayerRepository, LiquibaseConfig
+infra-web-backend   — Spring WebMVC + WebSocket: controllers, DTOs, RateLimiter, WebSocket handlers
+app                 — Spring Boot entry point: @Bean wiring (UseCaseConfig), SpaWebConfig, H2TcpServerConfig
+app-frontend        — React 19 + TypeScript + Vite (pnpm)
+```
+
+`domain` and `application` have **no Spring dependency** — enforced by Gradle.
+Use cases are wired via `@Bean` in `app/config/UseCaseConfig.java`.
+
 ## Tech Stack
 
 | Layer            | Choice                                                |
