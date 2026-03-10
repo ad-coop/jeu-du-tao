@@ -96,5 +96,6 @@ On-demand open with Read tool (don't import with @) :
 - `doc/quick-reference.md` — Commands, structure, critical standards
 - `doc/vision.md` — The long-term vision of the project
 - `doc/i18n.md` — i18n architecture, key naming conventions, workflow
+- `doc/architecture.md` - application architecture, technical decisions, technical standards, technical design
 
 When a decision impacts one of those documents, update it.
