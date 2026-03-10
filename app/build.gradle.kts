@@ -15,13 +15,12 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
     implementation("org.springframework.boot:spring-boot-starter-liquibase")
     testImplementation("org.springframework.boot:spring-boot-starter-liquibase-test")
-    implementation("org.springframework.boot:spring-boot-starter-websocket")
-    testImplementation("org.springframework.boot:spring-boot-starter-websocket-test")
 
     implementation(project(":application"))
     implementation(project(":domain"))
     implementation(project(":app-backend"))
     implementation(project(":infra-persistence"))
+    implementation(project(":infra-web-backend"))
     frontendDist(project(path = ":app-frontend", configuration = "frontendDist"))
 
     implementation("com.h2database:h2")
