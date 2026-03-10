@@ -1,5 +1,7 @@
-package fr.adcoop.jeudutao.service;
+package fr.adcoop.jeudutao.application.game;
 
+import fr.adcoop.jeudutao.application.port.MagicLinkSender;
+import fr.adcoop.jeudutao.application.port.PasswordEncoder;
 import fr.adcoop.jeudutao.domain.game.Game;
 import fr.adcoop.jeudutao.domain.game.GameState;
 import fr.adcoop.jeudutao.domain.game.HandleGenerator;
@@ -13,16 +15,16 @@ import fr.adcoop.jeudutao.domain.game.exception.PlayerNotFoundException;
 import fr.adcoop.jeudutao.domain.game.exception.UnauthorizedKickException;
 import fr.adcoop.jeudutao.domain.game.port.GameRepository;
 import fr.adcoop.jeudutao.domain.game.port.PlayerRepository;
-import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
 
-@Service
 public class GameService {
 
     public record CreateGameResult(Game game, Player guardian) {
@@ -37,32 +39,34 @@ public class GameService {
     private final GameRepository gameRepository;
     private final PlayerRepository playerRepository;
     private final HandleGenerator handleGenerator;
-    private final PasswordService passwordService;
-    private final MagicLinkService magicLinkService;
+    private final PasswordEncoder passwordEncoder;
+    private final MagicLinkSender magicLinkSender;
 
     public GameService(
             GameRepository gameRepository,
             PlayerRepository playerRepository,
             HandleGenerator handleGenerator,
-            PasswordService passwordService,
-            MagicLinkService magicLinkService
+            PasswordEncoder passwordEncoder,
+            MagicLinkSender magicLinkSender
     ) {
         this.gameRepository = gameRepository;
         this.playerRepository = playerRepository;
         this.handleGenerator = handleGenerator;
-        this.passwordService = passwordService;
-        this.magicLinkService = magicLinkService;
+        this.passwordEncoder = passwordEncoder;
+        this.magicLinkSender = magicLinkSender;
     }
 
     public CreateGameResult createGame(String userName, String email, String password) {
         var handle = handleGenerator.generate(h -> !gameRepository.existsByHandle(h));
-        var passwordHash = password != null ? passwordService.encode(password) : null;
+        var passwordHash = password != null ? passwordEncoder.encode(password) : null;
         var guardianId = UUID.randomUUID().toString();
 
         String magicLinkToken = null;
         Instant magicLinkExpiry = null;
         if (email != null) {
-            magicLinkToken = magicLinkService.generateToken();
+            var tokenBytes = new byte[16];
+            new SecureRandom().nextBytes(tokenBytes);
+            magicLinkToken = HexFormat.of().formatHex(tokenBytes);
             magicLinkExpiry = Instant.now().plus(7, ChronoUnit.DAYS);
         }
 
@@ -83,7 +87,7 @@ public class GameService {
         playerRepository.save(guardian);
 
         if (email != null) {
-            magicLinkService.sendLink(email, handle, magicLinkToken);
+            magicLinkSender.sendLink(email, handle, magicLinkToken);
         }
 
         return new CreateGameResult(game, guardian);
@@ -101,7 +105,7 @@ public class GameService {
         }
 
         if (game.passwordHash() != null) {
-            if (password == null || !passwordService.matches(password, game.passwordHash())) {
+            if (password == null || !passwordEncoder.matches(password, game.passwordHash())) {
                 throw new InvalidPasswordException();
             }
         }

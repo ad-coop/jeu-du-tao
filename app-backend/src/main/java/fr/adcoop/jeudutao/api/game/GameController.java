@@ -2,7 +2,7 @@ package fr.adcoop.jeudutao.api.game;
 
 import fr.adcoop.jeudutao.domain.game.exception.GameNotFoundException;
 import fr.adcoop.jeudutao.exception.RateLimitExceededException;
-import fr.adcoop.jeudutao.service.GameService;
+import fr.adcoop.jeudutao.application.game.GameService;
 import fr.adcoop.jeudutao.service.RateLimiter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;

@@ -18,6 +18,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     testImplementation("org.springframework.boot:spring-boot-starter-websocket-test")
 
+    implementation(project(":application"))
     implementation(project(":domain"))
     implementation(project(":app-backend"))
     frontendDist(project(path = ":app-frontend", configuration = "frontendDist"))

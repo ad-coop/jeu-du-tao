@@ -5,7 +5,7 @@ import fr.adcoop.jeudutao.domain.game.GameState;
 import fr.adcoop.jeudutao.domain.game.Player;
 import fr.adcoop.jeudutao.domain.game.PlayerRole;
 import fr.adcoop.jeudutao.domain.game.exception.InvalidMagicLinkException;
-import fr.adcoop.jeudutao.service.GameService;
+import fr.adcoop.jeudutao.application.game.GameService;
 import fr.adcoop.jeudutao.service.RateLimiter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

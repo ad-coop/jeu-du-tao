@@ -1,5 +1,7 @@
-package fr.adcoop.jeudutao.service;
+package fr.adcoop.jeudutao.application.game;
 
+import fr.adcoop.jeudutao.application.port.MagicLinkSender;
+import fr.adcoop.jeudutao.application.port.PasswordEncoder;
 import fr.adcoop.jeudutao.domain.game.Game;
 import fr.adcoop.jeudutao.domain.game.GameState;
 import fr.adcoop.jeudutao.domain.game.HandleGenerator;
@@ -26,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -37,8 +40,8 @@ class GameServiceTest {
     private GameRepository gameRepository;
     private PlayerRepository playerRepository;
     private HandleGenerator handleGenerator;
-    private PasswordService passwordService;
-    private MagicLinkService magicLinkService;
+    private PasswordEncoder passwordEncoder;
+    private MagicLinkSender magicLinkSender;
     private GameService gameService;
 
     @BeforeEach
@@ -46,11 +49,11 @@ class GameServiceTest {
         gameRepository = mock(GameRepository.class);
         playerRepository = mock(PlayerRepository.class);
         handleGenerator = mock(HandleGenerator.class);
-        passwordService = mock(PasswordService.class);
-        magicLinkService = mock(MagicLinkService.class);
-        reset(gameRepository, playerRepository, handleGenerator, passwordService, magicLinkService);
+        passwordEncoder = mock(PasswordEncoder.class);
+        magicLinkSender = mock(MagicLinkSender.class);
+        reset(gameRepository, playerRepository, handleGenerator, passwordEncoder, magicLinkSender);
 
-        gameService = new GameService(gameRepository, playerRepository, handleGenerator, passwordService, magicLinkService);
+        gameService = new GameService(gameRepository, playerRepository, handleGenerator, passwordEncoder, magicLinkSender);
 
         when(handleGenerator.generate(any())).thenReturn("GAME01");
     }
@@ -68,29 +71,27 @@ class GameServiceTest {
 
         verify(gameRepository).save(result.game());
         verify(playerRepository).save(result.guardian());
-        verify(magicLinkService, never()).sendLink(anyString(), anyString(), anyString());
+        verify(magicLinkSender, never()).sendLink(anyString(), anyString(), anyString());
     }
 
     @Test
     void createGame_withPassword_hashesPassword() {
-        when(passwordService.encode("secret")).thenReturn("hashed");
+        when(passwordEncoder.encode("secret")).thenReturn("hashed");
 
         var result = gameService.createGame("Alice", null, "secret");
 
         assertThat(result.game().passwordHash()).isEqualTo("hashed");
-        verify(passwordService).encode("secret");
+        verify(passwordEncoder).encode("secret");
     }
 
     @Test
     void createGame_withEmail_generatesMagicLinkAndSends() {
-        when(magicLinkService.generateToken()).thenReturn("abc123token");
-
         var result = gameService.createGame("Alice", "alice@example.com", null);
 
         assertThat(result.game().email()).isEqualTo("alice@example.com");
-        assertThat(result.game().magicLinkToken()).isEqualTo("abc123token");
+        assertThat(result.game().magicLinkToken()).isNotNull().isNotBlank();
         assertThat(result.game().magicLinkExpiry()).isNotNull();
-        verify(magicLinkService).sendLink("alice@example.com", "GAME01", "abc123token");
+        verify(magicLinkSender).sendLink(eq("alice@example.com"), eq("GAME01"), anyString());
     }
 
     @Test
@@ -127,7 +128,7 @@ class GameServiceTest {
     void joinGame_withWrongPassword_throwsInvalidPasswordException() {
         var game = gameWithState("GAME01", GameState.WAITING, "hashed");
         when(gameRepository.findByHandle("GAME01")).thenReturn(Optional.of(game));
-        when(passwordService.matches("wrong", "hashed")).thenReturn(false);
+        when(passwordEncoder.matches("wrong", "hashed")).thenReturn(false);
 
         assertThatThrownBy(() -> gameService.joinGame("GAME01", "Bob", "wrong"))
                 .isInstanceOf(InvalidPasswordException.class);
@@ -146,7 +147,7 @@ class GameServiceTest {
     void joinGame_withCorrectPassword_createsPlayer() {
         var game = gameWithState("GAME01", GameState.WAITING, "hashed");
         when(gameRepository.findByHandle("GAME01")).thenReturn(Optional.of(game));
-        when(passwordService.matches("secret", "hashed")).thenReturn(true);
+        when(passwordEncoder.matches("secret", "hashed")).thenReturn(true);
 
         var result = gameService.joinGame("GAME01", "Bob", "secret");
 
