@@ -35,6 +35,7 @@ application-local.yml
 application-local.properties
 
 # Claude
+.worktrees/
 .claude/worktrees
 .claire
 
