@@ -160,8 +160,6 @@ public class GameService {
                     return recreated;
                 });
 
-        gameRepository.clearMagicLinkToken(handle);
-
         return new RestoreResult(guardian.id(), guardian.name());
     }
 }

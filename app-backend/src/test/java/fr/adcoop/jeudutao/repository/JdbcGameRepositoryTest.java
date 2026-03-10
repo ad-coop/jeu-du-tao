@@ -84,19 +84,6 @@ class JdbcGameRepositoryTest {
         assertThat(repository.existsByHandle("ABC123")).isTrue();
     }
 
-    @Test
-    void clearMagicLinkToken_setsFieldsToNull() {
-        var game = new Game("ABC123", null, Instant.now().truncatedTo(ChronoUnit.MILLIS), GameState.WAITING, "guardian-id", "Alice", "some-token", Instant.now().truncatedTo(ChronoUnit.MILLIS).plus(1, ChronoUnit.DAYS), null);
-        repository.save(game);
-
-        repository.clearMagicLinkToken("ABC123");
-
-        var found = repository.findByHandle("ABC123");
-        assertThat(found).isPresent();
-        assertThat(found.get().magicLinkToken()).isNull();
-        assertThat(found.get().magicLinkExpiry()).isNull();
-    }
-
     private Game aGame(String handle) {
         return new Game(handle, null, Instant.now().truncatedTo(ChronoUnit.MILLIS), GameState.WAITING, "guardian-id", "Alice", null, null, null);
     }

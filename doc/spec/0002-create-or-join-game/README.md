@@ -103,7 +103,7 @@ Note: no lockout on wrong passwords — game passwords are low-stakes (casual ga
 ## Security
 
 - **Game password**: hashed server-side (bcrypt), never stored in plain text
-- **Magic link token**: cryptographically random (≥ 128 bits), single-use
+- **Magic link token**: cryptographically random (≥ 128 bits), valid until expiry
 - **Game handle**: random generation prevents enumeration of active games
 - **Rate limiting**:
   - Game creation: max 10 per hour per IP

@@ -11,6 +11,4 @@ public interface GameRepository {
     Optional<Game> findByHandle(String handle);
 
     boolean existsByHandle(String handle);
-
-    void clearMagicLinkToken(String handle);
 }

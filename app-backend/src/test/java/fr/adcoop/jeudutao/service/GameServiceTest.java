@@ -257,20 +257,6 @@ class GameServiceTest {
     }
 
     @Test
-    void restoreGuardian_invalidatesTokenAfterUse() {
-        var token = "valid-token";
-        var expiry = Instant.now().plus(1, ChronoUnit.HOURS);
-        var game = gameWithMagicLink(token, expiry);
-        var guardian = new Player("guardian-id", "Alice", PlayerRole.GUARDIAN, "GAME01");
-        when(gameRepository.findByHandle("GAME01")).thenReturn(Optional.of(game));
-        when(playerRepository.findById("guardian-id")).thenReturn(Optional.of(guardian));
-
-        gameService.restoreGuardian("GAME01", token);
-
-        verify(gameRepository).clearMagicLinkToken("GAME01");
-    }
-
-    @Test
     void restoreGuardian_whenPlayerDeleted_recreatesGuardianFromStoredName() {
         var token = "valid-token";
         var expiry = Instant.now().plus(1, ChronoUnit.HOURS);

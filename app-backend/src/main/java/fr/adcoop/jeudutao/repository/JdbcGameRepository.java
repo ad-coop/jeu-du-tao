@@ -54,13 +54,6 @@ public class JdbcGameRepository implements GameRepository {
                 .single() > 0;
     }
 
-    @Override
-    public void clearMagicLinkToken(String handle) {
-        jdbcClient.sql("UPDATE games SET magic_link_token = NULL, magic_link_expiry = NULL WHERE handle = :handle")
-                .param("handle", handle)
-                .update();
-    }
-
     private static Game mapRow(ResultSet rs, int rowNum) throws SQLException {
         var magicLinkExpiry = rs.getTimestamp("magic_link_expiry");
         return new Game(
