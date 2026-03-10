@@ -2,7 +2,7 @@ package fr.adcoop.jeudutao.infra.persistence.game;
 
 import fr.adcoop.jeudutao.domain.game.Game;
 import fr.adcoop.jeudutao.domain.game.GameState;
-import fr.adcoop.jeudutao.domain.game.port.GameRepository;
+import fr.adcoop.jeudutao.domain.game.port.GameCommandRepository;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
@@ -12,11 +12,11 @@ import java.sql.Timestamp;
 import java.util.Optional;
 
 @Repository
-public class JdbcGameRepository implements GameRepository {
+public class JdbcGameCommandRepository implements GameCommandRepository {
 
     private final JdbcClient jdbcClient;
 
-    public JdbcGameRepository(JdbcClient jdbcClient) {
+    public JdbcGameCommandRepository(JdbcClient jdbcClient) {
         this.jdbcClient = jdbcClient;
     }
 
@@ -43,7 +43,7 @@ public class JdbcGameRepository implements GameRepository {
     public Optional<Game> findByHandle(String handle) {
         return jdbcClient.sql("SELECT * FROM games WHERE handle = :handle")
                 .param("handle", handle)
-                .query(JdbcGameRepository::mapRow)
+                .query(JdbcGameCommandRepository::mapRow)
                 .optional();
     }
 

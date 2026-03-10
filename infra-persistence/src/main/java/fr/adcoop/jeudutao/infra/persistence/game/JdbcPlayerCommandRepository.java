@@ -2,21 +2,20 @@ package fr.adcoop.jeudutao.infra.persistence.game;
 
 import fr.adcoop.jeudutao.domain.game.Player;
 import fr.adcoop.jeudutao.domain.game.PlayerRole;
-import fr.adcoop.jeudutao.domain.game.port.PlayerRepository;
+import fr.adcoop.jeudutao.domain.game.port.PlayerCommandRepository;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class JdbcPlayerRepository implements PlayerRepository {
+public class JdbcPlayerCommandRepository implements PlayerCommandRepository {
 
     private final JdbcClient jdbcClient;
 
-    public JdbcPlayerRepository(JdbcClient jdbcClient) {
+    public JdbcPlayerCommandRepository(JdbcClient jdbcClient) {
         this.jdbcClient = jdbcClient;
     }
 
@@ -38,16 +37,8 @@ public class JdbcPlayerRepository implements PlayerRepository {
     public Optional<Player> findById(String id) {
         return jdbcClient.sql("SELECT * FROM players WHERE id = :id")
                 .param("id", id)
-                .query(JdbcPlayerRepository::mapRow)
+                .query(JdbcPlayerCommandRepository::mapRow)
                 .optional();
-    }
-
-    @Override
-    public List<Player> findByGameHandle(String gameHandle) {
-        return jdbcClient.sql("SELECT * FROM players WHERE game_handle = :gameHandle")
-                .param("gameHandle", gameHandle)
-                .query(JdbcPlayerRepository::mapRow)
-                .list();
     }
 
     @Override

@@ -18,30 +18,36 @@
 ## 2. Module Structure
 
 ```
-domain/              Pure Java. Aggregates, value objects, domain events, port interfaces.
-application/         Pure Java. Depends on domain only. Use cases as plain classes.
-infra-persistence/   Depends on domain. JDBC repositories, Liquibase migrations, DB config.
+domain/              Pure Java. Aggregates, value objects, domain events, command port interfaces.
+application/         Pure Java. Depends on domain only. Command + query use cases as plain classes.
+                     Owns query port interfaces and read models (GameInfoView, PlayerView).
+infra-persistence/   Depends on domain + application. JDBC repositories (command + query),
+                     Liquibase migrations, DB config.
 infra-web-backend/   Depends on application (+ domain types). REST controllers, DTOs,
                      exception handlers, WebSocket adapter.
 app/                 Spring Boot entry point. Depends on all infra modules.
                      Wires beans via @Bean methods. Serves the SPA.
-infra-web-frontend/        React SPA.
+infra-web-frontend/  React SPA.
 ```
 
 ### Per-module detail
 
-| Module               | Contains                                                                                                | Allowed dependencies                                 | Forbidden dependencies                              |
-|----------------------|---------------------------------------------------------------------------------------------------------|------------------------------------------------------|-----------------------------------------------------|
-| `domain`             | Aggregates, entities, value objects, domain events, repository/service interfaces (ports)               | Java stdlib                                          | Spring, Jakarta EE, any infra module, `application` |
-| `application`        | Use case classes (inbound port implementations), outbound port interfaces (e.g. `EmailSender`, `Clock`) | `domain`, Java stdlib                                | Spring, Jakarta EE, any infra module                |
-| `infra-persistence`  | JDBC repository implementations, Liquibase scripts, datasource config                                   | `domain`, Spring JDBC, Liquibase                     | `application`, other `infra-*` modules              |
-| `app`                | `@SpringBootApplication`, `@Bean` wiring, `SpaWebConfig`, application properties                        | All modules                                          | Business logic of any kind                          |
-| `infra-web-backend`  | REST controllers, WebSocket handlers, DTOs, JSON mappers, exception handlers                            | `application`, `domain` (value types), Spring WebMVC | `infra-persistence`                                 |
-| `infra-web-frontend` | React SPA source                                                                                        | (pnpm ecosystem)                                     | —                                                   |
+| Module               | Contains                                                                                                                                                                                       | Allowed dependencies                                 | Forbidden dependencies                              |
+|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------|-----------------------------------------------------|
+| `domain`             | Aggregates, entities, value objects, domain events, command port interfaces (`GameCommandRepository`, `PlayerCommandRepository`)                                                                | Java stdlib                                          | Spring, Jakarta EE, any infra module, `application` |
+| `application`        | `GameCommandService`, `GameQueryService` use cases; query port interfaces (`GameQueryRepository`, `PlayerQueryRepository`); read models (`GameInfoView`, `PlayerView`); outbound port interfaces (`PasswordEncoder`, `MagicLinkSender`) | `domain`, Java stdlib | Spring, Jakarta EE, any infra module |
+| `infra-persistence`  | JDBC command + query repository implementations, Liquibase scripts, datasource config                                                                                                          | `domain`, `application`, Spring JDBC, Liquibase      | other `infra-*` modules                             |
+| `app`                | `@SpringBootApplication`, `@Bean` wiring, `SpaWebConfig`, application properties                                                                                                              | All modules                                          | Business logic of any kind                          |
+| `infra-web-backend`  | REST controllers, WebSocket handlers, DTOs, JSON mappers, exception handlers                                                                                                                   | `application`, `domain` (value types), Spring WebMVC | `infra-persistence`                                 |
+| `infra-web-frontend` | React SPA source                                                                                                                                                                               | (pnpm ecosystem)                                     | —                                                   |
 
 **Important:** `domain` and `application` do **not** include the Spring BOM. Use cases are
 plain Java classes instantiated via `@Bean` methods in `app`, never annotated with `@Service`
 or `@Component`.
+
+**Note on `infra-persistence`:** this module depends on both `domain` (for command repositories that
+handle aggregates) and `application` (for query repositories that return read models). This is the
+only intended exception to the rule that `infra-*` modules depend only on `domain`.
 
 ---
 
@@ -67,32 +73,77 @@ REST controllers and WebSocket handlers in `infra-web` call these interfaces. Th
 
 ### Outbound ports (driving side)
 
-**Repository ports** — defined in `domain`, implemented in `infra-persistence`:
+**Command repository ports** — defined in `domain`, implemented in `infra-persistence`.
+They deal with aggregates and belong to the domain:
 
 ```
-domain.game.port.GameRepository
+domain.game.port.GameCommandRepository
+domain.game.port.PlayerCommandRepository
+```
+
+**Query repository ports** — defined in `application`, implemented in `infra-persistence`.
+They return read models (`GameInfoView`, `PlayerView`) and therefore cannot live in `domain`
+(which cannot depend on `application`):
+
+```
+application.game.query.GameQueryRepository
+application.game.query.PlayerQueryRepository
 ```
 
 **Infrastructure service ports** — defined in `application`, implemented in `infra-*`:
 
 ```
-application.port.EmailSender
 application.port.PasswordEncoder
-application.port.Clock
+application.port.MagicLinkSender
 ```
 
 ### Adapter summary
 
-| Adapter type        | Location                                  | Calls                                        |
-|---------------------|-------------------------------------------|----------------------------------------------|
-| Inbound — REST      | `infra-web-backend`                       | Application use case interfaces              |
-| Inbound — WebSocket | `infra-web-backend` (or dedicated module) | Application use case interfaces              |
-| Outbound — JDBC     | `infra-persistence`                       | Implements `domain.game.port.GameRepository` |
-| Outbound — SMTP     | `infra-mail`                              | Implements `application.port.EmailSender`    |
+| Adapter type        | Location                                  | Calls                                                                               |
+|---------------------|-------------------------------------------|-------------------------------------------------------------------------------------|
+| Inbound — REST      | `infra-web-backend`                       | `GameCommandService`, `GameQueryService`                                            |
+| Inbound — WebSocket | `infra-web-backend` (or dedicated module) | `GameCommandService`, `GameQueryService`                                            |
+| Outbound — JDBC (command) | `infra-persistence`               | Implements `domain.game.port.GameCommandRepository`, `PlayerCommandRepository`      |
+| Outbound — JDBC (query)   | `infra-persistence`               | Implements `application.game.query.GameQueryRepository`, `PlayerQueryRepository`    |
+| Outbound — SMTP     | `infra-mail`                              | Implements `application.port.MagicLinkSender`                                       |
 
 ---
 
-## 4. DDD Tactical Patterns
+## 4. CQRS: Command/Query Responsibility Segregation
+
+The application layer is split along CQRS lines:
+
+| Side    | Service              | Purpose                                  | Returns                                    |
+|---------|----------------------|------------------------------------------|--------------------------------------------|
+| Command | `GameCommandService` | State mutations: create, join, kick, restore | Typed result records with primitives only  |
+| Query   | `GameQueryService`   | Read-only projections: game info, player list | `GameInfoView`, `List<PlayerView>` read models |
+
+### Why query ports live in `application`, not `domain`
+
+Command repository ports (`GameCommandRepository`, `PlayerCommandRepository`) deal with domain
+aggregates (`Game`, `Player`) and belong in `domain`.
+
+Query repository ports (`GameQueryRepository`, `PlayerQueryRepository`) return application-level
+read models (`GameInfoView`, `PlayerView`). These read models are projections — they are not domain
+entities. Since `domain` cannot depend on `application`, the query ports must live in `application`.
+
+This is the reason `infra-persistence` depends on `application`: it must implement interfaces that
+live there.
+
+### Synchronisation
+
+Both sides read from and write to the same database tables. There is no event sourcing, no separate
+read store, and no eventual consistency. The command and query sides are synchronised within the
+same transaction.
+
+### Result types
+
+`GameCommandService` result records expose only primitives and strings. No domain objects (`Game`,
+`Player`) leak out of the application layer. This decouples the web layer from the domain model.
+
+---
+
+## 5. DDD Tactical Patterns
 
 ### Aggregate root: `Game`
 
@@ -131,48 +182,75 @@ broadcasts, email notifications):
 - `PlayerLeft`
 - `PlayerKicked`
 
-The dispatch mechanism (return values vs. event publisher) is a decision left open (see section 9).
+The dispatch mechanism (return values vs. event publisher) is a decision left open (see section 10).
 
 ### Repositories as ports
 
-`GameRepository` is an interface defined in `domain`. It expresses persistence *intent* in domain terms:
+The repository layer is split along CQRS lines:
+
+**Command repositories** — defined in `domain`, handle aggregate load/save:
 
 ```java
 // domain.game.port
-public interface GameRepository {
+public interface GameCommandRepository {
     void save(Game game);
+    Optional<Game> findByHandle(String handle);
+    boolean existsByHandle(String handle);
+}
 
-    Optional<Game> findById(GameId id);
-
-    Optional<Game> findByJoinCode(JoinCode code);
+public interface PlayerCommandRepository {
+    void save(Player player);
+    Optional<Player> findById(String id);
+    List<Player> findByGameHandle(String gameHandle);
+    void deleteById(String id);
 }
 ```
 
-The JDBC implementation lives in `infra-persistence` and is wired via `@Bean` in `app`.
+**Query repositories** — defined in `application`, return read model projections:
+
+```java
+// application.game.query
+public interface GameQueryRepository {
+    Optional<GameInfoView> findGameInfo(String handle);
+}
+
+public interface PlayerQueryRepository {
+    List<PlayerView> findPlayersByGame(String gameHandle);
+}
+```
+
+All JDBC implementations live in `infra-persistence` and are wired via `@Bean` in `app`.
+The synchronisation strategy is synchronous (same DB tables, same transaction).
 
 ---
 
-## 5. Package Conventions
+## 6. Package Conventions
 
 Root package: `fr.adcoop.jeudutao`
 
 ```
 domain/
-  fr.adcoop.jeudutao.domain.game          ← Game, Player, GameId, JoinCode, …
+  fr.adcoop.jeudutao.domain.game          ← Game, Player, GameState, PlayerRole, …
   fr.adcoop.jeudutao.domain.game.event    ← GameCreated, PlayerJoined, …
-  fr.adcoop.jeudutao.domain.game.port     ← GameRepository interface
+  fr.adcoop.jeudutao.domain.game.port     ← GameCommandRepository, PlayerCommandRepository
   fr.adcoop.jeudutao.domain.shared        ← shared value objects (EmailAddress, …)
 
 application/
-  fr.adcoop.jeudutao.application.game     ← CreateGame, JoinGame, KickPlayer use cases
-  fr.adcoop.jeudutao.application.port     ← EmailSender, PasswordEncoder, Clock
+  fr.adcoop.jeudutao.application.game.command  ← GameCommandService
+  fr.adcoop.jeudutao.application.game.query    ← GameQueryService, GameQueryRepository,
+                                                  PlayerQueryRepository, GameInfoView, PlayerView
+  fr.adcoop.jeudutao.application.port          ← PasswordEncoder, MagicLinkSender
 
 infra-persistence/
-  fr.adcoop.jeudutao.infra.persistence.game    ← JdbcGameRepository
+  fr.adcoop.jeudutao.infra.persistence.game    ← JdbcGameCommandRepository,
+                                                  JdbcPlayerCommandRepository,
+                                                  JdbcGameQueryRepository,
+                                                  JdbcPlayerQueryRepository
   fr.adcoop.jeudutao.infra.persistence.config  ← DataSource, Liquibase config
 
 infra-web-backend/
-  fr.adcoop.jeudutao.infra.web.game       ← GameController, DTOs, WebSocket handlers
+  fr.adcoop.jeudutao.infra.web.game       ← GameController, DTOs, PlayerInfo
+  fr.adcoop.jeudutao.infra.web.websocket  ← WebSocketDisconnectListener, WebSocketSessionManager
   fr.adcoop.jeudutao.infra.web.i18n       ← I18nController
   fr.adcoop.jeudutao.infra.web.config     ← SpaWebConfig, WebSocket config
 
@@ -183,24 +261,28 @@ app/
 
 ---
 
-## 6. Dependency Rules
+## 7. Dependency Rules
 
-| Module              | Depends on                                           | Must NOT depend on                                  |
-|---------------------|------------------------------------------------------|-----------------------------------------------------|
-| `domain`            | Java stdlib                                          | Spring, Jakarta EE, any infra module, `application` |
-| `application`       | `domain`, Java stdlib                                | Spring, Jakarta EE, any infra module                |
-| `infra-persistence` | `domain`, Spring JDBC, Liquibase                     | `application`, other `infra-*`                      |
-| `infra-web-backend` | `application`, `domain` (value types), Spring WebMVC | `infra-persistence`                                 |
-| `app`               | All modules                                          | Business logic of any kind                          |
+| Module              | Depends on                                              | Must NOT depend on                                  |
+|---------------------|---------------------------------------------------------|-----------------------------------------------------|
+| `domain`            | Java stdlib                                             | Spring, Jakarta EE, any infra module, `application` |
+| `application`       | `domain`, Java stdlib                                   | Spring, Jakarta EE, any infra module                |
+| `infra-persistence` | `domain`, `application`¹, Spring JDBC, Liquibase        | other `infra-*` modules                             |
+| `infra-web-backend` | `application`, `domain` (value types), Spring WebMVC    | `infra-persistence`                                 |
+| `app`               | All modules                                             | Business logic of any kind                          |
+
+¹ `infra-persistence` depends on `application` specifically to implement the query repository ports
+(`GameQueryRepository`, `PlayerQueryRepository`) which return application-level read models.
+This is the only sanctioned exception to the rule that `infra-*` modules do not depend on `application`.
 
 **Enforcement:** Gradle module declarations are the primary enforcement mechanism. Because
 `domain` and `application` do not declare Spring as a dependency, any accidental `@Service`
 or `@Autowired` annotation will fail to compile. ArchUnit may be adopted later for finer-grained intra-module rules (see
-section 9).
+section 10).
 
 ---
 
-## 7. Infrastructure: Statelessness & Horizontal Scaling
+## 8. Infrastructure: Statelessness & Horizontal Scaling
 
 **Constraint:** No in-memory state may be held by an application instance across requests.
 This forbids `ConcurrentHashMap` session stores and an in-process STOMP broker.
@@ -221,7 +303,7 @@ inside the application.
 
 ---
 
-## 8. Testing Strategy
+## 9. Testing Strategy
 
 | Layer               | Approach                                                                                    | Spring context    |
 |---------------------|---------------------------------------------------------------------------------------------|-------------------|
@@ -236,7 +318,7 @@ and independent of framework changes. Adapter tests are isolated to their slice.
 
 ---
 
-## 9. Decisions Left Open
+## 10. Decisions Left Open
 
 The following are not yet resolved and should not be assumed in implementation:
 
