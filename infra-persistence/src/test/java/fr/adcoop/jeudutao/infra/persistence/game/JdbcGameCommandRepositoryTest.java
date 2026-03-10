@@ -21,10 +21,10 @@ import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class JdbcGameRepositoryTest {
+class JdbcGameCommandRepositoryTest {
 
     private EmbeddedDatabase db;
-    private JdbcGameRepository repository;
+    private JdbcGameCommandRepository repository;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -39,7 +39,7 @@ class JdbcGameRepositoryTest {
         )) {
             liquibase.update(new Contexts(), new LabelExpression());
         }
-        repository = new JdbcGameRepository(JdbcClient.create(db));
+        repository = new JdbcGameCommandRepository(JdbcClient.create(db));
     }
 
     @AfterEach

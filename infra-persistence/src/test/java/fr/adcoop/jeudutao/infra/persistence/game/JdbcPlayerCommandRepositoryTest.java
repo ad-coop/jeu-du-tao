@@ -23,10 +23,10 @@ import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class JdbcPlayerRepositoryTest {
+class JdbcPlayerCommandRepositoryTest {
 
     private EmbeddedDatabase db;
-    private JdbcPlayerRepository repository;
+    private JdbcPlayerCommandRepository repository;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -42,8 +42,8 @@ class JdbcPlayerRepositoryTest {
             liquibase.update(new Contexts(), new LabelExpression());
         }
         var jdbcClient = JdbcClient.create(db);
-        var gameRepository = new JdbcGameRepository(jdbcClient);
-        repository = new JdbcPlayerRepository(jdbcClient);
+        var gameRepository = new JdbcGameCommandRepository(jdbcClient);
+        repository = new JdbcPlayerCommandRepository(jdbcClient);
 
         var createdAt = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         gameRepository.save(new Game("GAME01", null, createdAt, GameState.WAITING, "guardian-id", "Alice", null, null, null));
@@ -67,26 +67,6 @@ class JdbcPlayerRepositoryTest {
         repository.save(player);
 
         assertThat(repository.findById("player-1")).isPresent().contains(player);
-    }
-
-    @Test
-    void findByGameHandle_whenNoMatch_returnsEmpty() {
-        repository.save(new Player("p1", "Alice", PlayerRole.GUARDIAN, "GAME01"));
-
-        assertThat(repository.findByGameHandle("OTHER1")).isEmpty();
-    }
-
-    @Test
-    void findByGameHandle_returnsPlayersForHandle() {
-        var player1 = new Player("p1", "Alice", PlayerRole.GUARDIAN, "GAME01");
-        var player2 = new Player("p2", "Bob", PlayerRole.PLAYER, "GAME01");
-        var otherPlayer = new Player("p3", "Charlie", PlayerRole.PLAYER, "OTHER1");
-
-        repository.save(player1);
-        repository.save(player2);
-        repository.save(otherPlayer);
-
-        assertThat(repository.findByGameHandle("GAME01")).containsExactlyInAnyOrder(player1, player2);
     }
 
     @Test

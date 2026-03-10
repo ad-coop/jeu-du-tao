@@ -8,6 +8,7 @@ tasks.named("jar") {
 
 dependencies {
     implementation(project(":domain"))
+    implementation(project(":application"))
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-liquibase")
     testImplementation("org.springframework.boot:spring-boot-starter-jdbc-test")

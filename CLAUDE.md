@@ -42,9 +42,9 @@ A Guardian initiates the game, then invites other players to join.
 ## Module Structure
 
 ```
-domain              — pure Java: Game, Player, port interfaces (GameRepository, PlayerRepository), exceptions
-application         — pure Java: GameService use case, PasswordEncoder/MagicLinkSender port interfaces
-infra-persistence   — Spring JDBC + Liquibase: JdbcGameRepository, JdbcPlayerRepository, LiquibaseConfig
+domain              — pure Java: Game, Player, command port interfaces (GameCommandRepository, PlayerCommandRepository), exceptions
+application         — pure Java: GameCommandService, GameQueryService use cases, query ports (GameQueryRepository, PlayerQueryRepository), read models (GameInfoView, PlayerView), PasswordEncoder/MagicLinkSender port interfaces
+infra-persistence   — Spring JDBC + Liquibase: JdbcGameCommandRepository, JdbcPlayerCommandRepository, JdbcGameQueryRepository, JdbcPlayerQueryRepository, LiquibaseConfig
 infra-web-backend   — Spring WebMVC + WebSocket: controllers, DTOs, RateLimiter, WebSocket handlers
 infra-web-frontend  — React 19 + TypeScript + Vite (pnpm)
 app                 — Spring Boot entry point: @Bean wiring (UseCaseConfig), SpaWebConfig, H2TcpServerConfig

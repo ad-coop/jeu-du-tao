@@ -1,8 +1,9 @@
 package fr.adcoop.jeudutao.infra.web.game;
 
+import fr.adcoop.jeudutao.application.game.command.GameCommandService;
+import fr.adcoop.jeudutao.application.game.query.GameQueryService;
 import fr.adcoop.jeudutao.domain.game.exception.GameNotFoundException;
 import fr.adcoop.jeudutao.infra.web.ratelimit.RateLimitExceededException;
-import fr.adcoop.jeudutao.application.game.GameService;
 import fr.adcoop.jeudutao.infra.web.ratelimit.RateLimiter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -29,12 +30,14 @@ public class GameController {
     private static final Pattern HANDLE_PATTERN = Pattern.compile("[A-Z0-9]{6}");
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
-    private final GameService gameService;
+    private final GameCommandService commandService;
+    private final GameQueryService queryService;
     private final SimpMessagingTemplate messagingTemplate;
     private final RateLimiter rateLimiter;
 
-    public GameController(GameService gameService, SimpMessagingTemplate messagingTemplate, RateLimiter rateLimiter) {
-        this.gameService = gameService;
+    public GameController(GameCommandService commandService, GameQueryService queryService, SimpMessagingTemplate messagingTemplate, RateLimiter rateLimiter) {
+        this.commandService = commandService;
+        this.queryService = queryService;
         this.messagingTemplate = messagingTemplate;
         this.rateLimiter = rateLimiter;
     }
@@ -55,27 +58,17 @@ public class GameController {
             validatePassword(request.password());
         }
 
-        var result = gameService.createGame(
-                request.userName().trim(),
-                request.email(),
-                request.password()
-        );
+        var result = commandService.createGame(request.userName().trim(), request.email(), request.password());
+        broadcastPlayerList(result.handle());
 
-        broadcastPlayerList(result.game().handle());
-
-        return new CreateGameResponse(
-                result.game().handle(),
-                result.guardian().id(),
-                result.game().passwordHash() != null,
-                result.game().email() != null
-        );
+        return new CreateGameResponse(result.handle(), result.guardianId(), result.passwordProtected(), result.hasEmail());
     }
 
     @GetMapping("/{handle}")
     public GameInfoResponse getGameInfo(@PathVariable("handle") String handle) {
         validateHandle(handle);
-        var game = gameService.getGameInfo(handle);
-        return new GameInfoResponse(game.handle(), game.state().name(), game.passwordHash() != null);
+        var view = queryService.getGameInfo(handle);
+        return new GameInfoResponse(view.handle(), view.state(), view.passwordProtected());
     }
 
     @PostMapping("/{handle}/players")
@@ -93,16 +86,16 @@ public class GameController {
             }
         }
 
-        var result = gameService.joinGame(handle, request.userName().trim(), request.password());
+        var result = commandService.joinGame(handle, request.userName().trim(), request.password());
         broadcastPlayerList(handle);
 
-        return new JoinGameResponse(result.player().id());
+        return new JoinGameResponse(result.playerId());
     }
 
     @GetMapping("/{handle}/players")
     public List<PlayerInfo> getPlayers(@PathVariable("handle") String handle) {
         validateHandle(handle);
-        return gameService.getPlayers(handle).stream()
+        return queryService.getPlayers(handle).stream()
                 .map(PlayerInfo::from)
                 .toList();
     }
@@ -113,10 +106,12 @@ public class GameController {
             @RequestBody RestoreGameRequest request
     ) {
         validateHandle(handle);
-        var result = gameService.restoreGuardian(handle, request.token());
+        var result = commandService.restoreGuardian(handle, request.token());
         broadcastPlayerList(handle);
-        var game = gameService.getGameInfo(handle);
-        return new RestoreGameResponse(result.playerId(), result.playerName(), game.passwordHash() != null, game.email() != null);
+        // Read the game state after restore to get passwordProtected/hasEmail for the response.
+        // Synchronous CQRS: command and query share the same DB transaction, so this read is consistent.
+        var view = queryService.getGameInfo(handle);
+        return new RestoreGameResponse(result.playerId(), result.playerName(), view.passwordProtected(), view.hasEmail());
     }
 
     @DeleteMapping("/{handle}/players/{playerId}")
@@ -127,7 +122,7 @@ public class GameController {
             @RequestHeader("X-Player-Id") String requestingPlayerId
     ) {
         validateHandle(handle);
-        gameService.kickPlayer(handle, requestingPlayerId, playerId);
+        commandService.kickPlayer(handle, requestingPlayerId, playerId);
         broadcastPlayerList(handle);
         messagingTemplate.convertAndSend("/topic/games/" + handle + "/kick/" + playerId, (Object) Map.of());
     }
@@ -160,7 +155,7 @@ public class GameController {
     }
 
     private void broadcastPlayerList(String handle) {
-        var players = gameService.getPlayers(handle).stream()
+        var players = queryService.getPlayers(handle).stream()
                 .map(PlayerInfo::from)
                 .toList();
         messagingTemplate.convertAndSend("/topic/games/" + handle + "/players", players);
