@@ -25,7 +25,7 @@ infra-web-backend/   Depends on application (+ domain types). REST controllers, 
                      exception handlers, WebSocket adapter.
 app/                 Spring Boot entry point. Depends on all infra modules.
                      Wires beans via @Bean methods. Serves the SPA.
-app-frontend/        React SPA.
+infra-web-frontend/        React SPA.
 ```
 
 ### Per-module detail

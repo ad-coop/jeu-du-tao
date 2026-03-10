@@ -46,8 +46,8 @@ domain              — pure Java: Game, Player, port interfaces (GameRepository
 application         — pure Java: GameService use case, PasswordEncoder/MagicLinkSender port interfaces
 infra-persistence   — Spring JDBC + Liquibase: JdbcGameRepository, JdbcPlayerRepository, LiquibaseConfig
 infra-web-backend   — Spring WebMVC + WebSocket: controllers, DTOs, RateLimiter, WebSocket handlers
+infra-web-frontend  — React 19 + TypeScript + Vite (pnpm)
 app                 — Spring Boot entry point: @Bean wiring (UseCaseConfig), SpaWebConfig, H2TcpServerConfig
-app-frontend        — React 19 + TypeScript + Vite (pnpm)
 ```
 
 `domain` and `application` have **no Spring dependency** — enforced by Gradle.
@@ -98,7 +98,7 @@ Health details visible only to authorized users (`when_authorized`).
 ## i18n
 
 - (important) The frontend (`t()` call sites) is the **single source of truth** for i18n key names.
-- Before writing any key in `messages_fr.properties`, grep the frontend for the actual keys used: `grep -r 't("' app-frontend/src`.
+- Before writing any key in `messages_fr.properties`, grep the frontend for the actual keys used: `grep -r 't("' infra-web-frontend/src`.
 - Never invent key names server-side — derive them from the frontend code.
 - Key naming convention: `<feature>.<section>.<element>` (e.g., `game.waiting.handle.copy`). See `doc/i18n.md`.
 - (important) When multiple agents work in parallel on the same feature, i18n must be owned by a single agent (preferably the frontend agent, which also writes the properties file).

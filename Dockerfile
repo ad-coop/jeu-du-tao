@@ -13,12 +13,12 @@ COPY build.gradle.kts settings.gradle.kts gradle.properties ./
 
 RUN ./gradlew dependencies --no-daemon -q
 
-COPY app-frontend/package.json app-frontend/pnpm-lock.yaml app-frontend/
-RUN cd app-frontend && pnpm install --frozen-lockfile
+COPY infra-web-frontend/package.json infra-web-frontend/pnpm-lock.yaml infra-web-frontend/
+RUN cd infra-web-frontend && pnpm install --frozen-lockfile
 
 COPY app/ app/
-COPY app-backend/ app-backend/
-COPY app-frontend/ app-frontend/
+COPY infra-web-backend/ infra-web-backend/
+COPY infra-web-frontend/ infra-web-frontend/
 RUN ./gradlew :app:bootJar --no-daemon -q
 
 FROM gcr.io/distroless/java25-debian13

@@ -7,7 +7,7 @@
 ./gradlew :app:bootRun       # Run the application (port 8080)
 ./gradlew :app:bootJar       # Build fat JAR
 
-# Frontend (in app-frontend/)
+# Frontend (in infra-web-frontend/)
 pnpm install                 # Install dependencies
 pnpm run dev                 # Vite dev server (proxies /api, /actuator to :8080)
 pnpm run build               # Production build → dist/
@@ -19,13 +19,13 @@ pnpm run lint                # ESLint
 
 ```
 app           — Spring Boot entry point; serves frontend SPA at /
-app-backend   — REST controllers under /api/** (all REST endpoints go here)
-app-frontend  — React SPA (non-Java; uses pnpm + Vite)
+infra-web-backend   — REST controllers under /api/** (all REST endpoints go here)
+infra-web-frontend  — React SPA (non-Java; uses pnpm + Vite)
 ```
 
 ### API conventions
 
-- All REST endpoints live in `app-backend` under the `/api/**` prefix.
+- All REST endpoints live in `infra-web-backend` under the `/api/**` prefix.
 - `/actuator/**` is reserved for Spring Boot actuator.
 - Any unmatched path is served `index.html` by the SPA fallback (`SpaWebConfig`).
 

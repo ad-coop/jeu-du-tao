@@ -20,7 +20,7 @@ dependencies {
 
     implementation("org.springframework.security:spring-security-crypto")
 
-    frontendDist(project(path = ":app-frontend", configuration = "frontendDist"))
+    frontendDist(project(path = ":infra-web-frontend", configuration = "frontendDist"))
 
     implementation("com.h2database:h2")
 
