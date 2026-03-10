@@ -1,11 +1,5 @@
 # Architecture
 
-> **This document describes the target architecture, not the current state of the codebase.**
-> The codebase will converge toward this blueprint through incremental refactoring.
-> Until a module or pattern is implemented, the current code takes precedence in practice.
-
----
-
 ## 1. Guiding Principles
 
 1. **Domain purity** — `domain` and `application` modules have zero framework dependencies (Java stdlib only). This
@@ -21,18 +15,17 @@
 
 ---
 
-## 2. Target Module Structure
+## 2. Module Structure
 
 ```
 domain/              Pure Java. Aggregates, value objects, domain events, port interfaces.
 application/         Pure Java. Depends on domain only. Use cases as plain classes.
 infra-persistence/   Depends on domain. JDBC repositories, Liquibase migrations, DB config.
-infra-web/           Depends on application (+ domain types). REST controllers, DTOs,
-                     exception handlers. May also contain the WebSocket adapter, or that
-                     adapter may live in a dedicated module (decision deferred).
+infra-web-backend/   Depends on application (+ domain types). REST controllers, DTOs,
+                     exception handlers, WebSocket adapter.
 app/                 Spring Boot entry point. Depends on all infra modules.
                      Wires beans via @Bean methods. Serves the SPA.
-app-frontend/        React SPA. Unchanged by the backend refactoring.
+app-frontend/        React SPA.
 ```
 
 ### Per-module detail
@@ -247,7 +240,6 @@ and independent of framework changes. Adapter tests are isolated to their slice.
 
 The following are not yet resolved and should not be assumed in implementation:
 
-1. **Exact module naming** — `infra-persistence` and `infra-web-backend` are working names.
-2. **WebSocket module** — may stay in `infra-web-backend` or move to a dedicated `infra-websocket` module.
-3. **Domain event dispatch** — aggregate methods may return a list of events, or a domain event publisher may be
+1. **WebSocket module** — currently in `infra-web-backend`; may move to a dedicated `infra-websocket` module.
+2. **Domain event dispatch** — aggregate methods may return a list of events, or a domain event publisher may be
    injected. Both approaches have trade-offs.

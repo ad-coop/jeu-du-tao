@@ -13,9 +13,6 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
-    implementation("org.springframework.boot:spring-boot-starter-liquibase")
-    testImplementation("org.springframework.boot:spring-boot-starter-liquibase-test")
-
     implementation(project(":domain"))
     implementation(project(":application"))
     implementation(project(":infra-persistence"))
