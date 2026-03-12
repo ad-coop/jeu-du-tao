@@ -7,9 +7,9 @@ const mockSubscribe = vi.fn();
 let capturedOnConnect: (() => void) | undefined;
 
 vi.mock("@stomp/stompjs", () => ({
-  Client: vi.fn().mockImplementation((options: {
+  Client: vi.fn().mockImplementation(function(options: {
     onConnect?: () => void;
-  }) => {
+  }) {
     capturedOnConnect = options.onConnect;
     return {
       activate: mockActivate,
