@@ -10,16 +10,16 @@ export function GameHandleRouter() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { session, setSession } = useGameSession();
   const navigate = useNavigate();
-  const [isRestoring, setIsRestoring] = useState(false);
-
   const token = searchParams.get("token");
+  const [isRestoring, setIsRestoring] = useState(
+    () => !!(handle && token && !(session && session.handle === handle)),
+  );
 
   useEffect(() => {
     if (!handle || !token || (session && session.handle === handle)) {
       return;
     }
 
-    setIsRestoring(true);
     gameApi
       .restoreGame(handle, token)
       .then((result) => {
